@@ -1,0 +1,183 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: url("https://images.pexels.com/photos/869258/pexels-photo-869258.jpeg") no-repeat center center fixed;
+    background-size: cover;
+    overflow-y: auto;
+}
+
+/* 폼 스타일 */
+form {
+    max-width: 500px;
+    width: 100%;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-top: 130px;
+}
+
+/* 레이블 스타일 */
+label {
+    display: block;
+    margin-bottom: 4px; /* 높이 간격 조정 */
+    font-weight: bold;
+}
+
+/* 입력 필드와 중복 확인 버튼을 같은 줄에 배치 */
+.input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px; /* 높이 간격 조정 */
+}
+
+/* 중복 확인 버튼이 있는 입력 필드의 경우 */
+.input-group.has-check {
+    justify-content: space-between; /* 입력 필드와 버튼을 양 끝으로 배치 */
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 95%;
+}
+
+button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: 8px; /* 입력 필드와 버튼 간의 간격 조정 */
+    border-radius: 8px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* 상태 메시지 기본적으로 숨기기 */
+.ok, .already {
+    display: none; /* 기본적으로 숨김 */
+    margin-bottom: 6px; /* 높이 간격 조정 */
+    font-size: 14px;
+}
+
+.ok {
+    color: #28a745;
+}
+
+.already {
+    color: #dc3545;
+}
+
+/* 성별 선택 버튼 스타일 */
+.gender-selection {
+    display: flex;
+    gap: 8px; /* 버튼 간 간격 조정 */
+    margin-bottom: 8px; /* 높이 간격 조정 */
+}
+
+.gender-selection input[type="radio"] {
+    display: none;
+}
+
+/* 성별 선택 버튼에 마우스 오버 시 하늘색으로 변경 */
+.gender-selection label:hover {
+    background-color: #6ea8fe; /* 하늘색으로 변경 */
+    color: #fff;
+}
+
+.gender-selection label {
+    background-color: #f1f1f1;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-align: center;
+}
+
+.gender-selection input[type="radio"]:checked + label {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* 파일 목록 스타일 */
+.filebox {
+    margin-bottom: 10px;
+}
+
+.filename {
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+/* 제출 및 뒤로가기 버튼 스타일 */
+#submitBtn,
+button[onclick="history.back();"] {
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#submitBtn {
+    background-color: #007bff;
+    width: 100%; /* 버튼을 부모 요소의 너비에 맞게 확장 */
+    box-sizing: border-box; /* 패딩과 테두리를 포함하여 전체 너비를 계산 */
+    margin: 0; /* 기본 마진 제거 */
+}
+
+#submitBtn:hover {
+    background-color: #007bff;
+}
+
+button[onclick="history.back();"] {
+    background-color: #6c757d;
+}
+
+button[onclick="history.back();"]:hover {
+    background-color: #5a6268;
+}
+
+.login_go {
+    font-size: 12pt;
+}
+
+
+/* 중복 확인 버튼을 둥글게 변경 */
+button.loginIdCheckButton,
+button.nicknameCheckButton,
+button.emailCheckButton {
+    border-radius: 8px; /* 살짝 둥글게 변경 (input 필드와 유사한 둥글기) */
+    padding: 10px 16px; /* 적당한 여백 추가 */
+    background-color: #007bff; /* 파란색 */
+    color: white;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+button.loginIdCheckButton:hover,
+button.nicknameCheckButton:hover,
+button.emailCheckButton:hover {
+    background-color: #0056b3; /* 마우스 오버 시 색상 변경 */
+}
+
+.signUp-title {
+    display: flex;
+    justify-content: center;
+}

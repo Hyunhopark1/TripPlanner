@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>findID</title>
+    <script language="JavaScript" src="/js/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="/user/css/findID.css">
+    <script>
+        $.findID = function () {
+            let email = $("#email").val();
+            let name = $("#name").val();
+            $.ajax({
+                url: "/api/find/findid",
+                type: "POST",
+                dataType: "JSON",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({
+                    email: email,
+                    name: name
+                }),
+            }).done(function (data, status, xhr) {
+                if (data.loginId) {
+                    $("#result").html("<span class='success'>" + data.loginId + "</span>");
+                } else {
+                    $("#result").text(data.message);
+                }
+            }).fail(function (jqXHR, status, errorThrown) {
+                console.log("Error occurred ", jqXHR.responseText);
+                alert("에러 발생 : " + jqXHR.responseText)
+            });
+        }
+    </script>
+    {{>layout/linkcss}}
+</head>
+<body>
+{{>layout/headermenu}}
+<div class="container">
+    <div class="form-wrapper">
+        <div class="form-container" id="find-id-form">
+            <h2>ID 찾기</h2>
+            <div class="form-group">
+                <label for="email" class="find-id-label">이메일</label>
+                <input type="email" id="email" name="email" required><br><br>
+            </div>
+            <div class="form-group">
+                <label for="name" class="find-id-label">이름</label>
+                <input type="text" id="name" name="name" required><br><br>
+            </div>
+            <button type="button" id="find-id-btn" onclick="$.findID()">ID 찾기</button>
+            <div id="result"></div><p></p>
+            <p class="login_link">로그인 하러 가시겠습니까?<a href="/selogin/login" id="show-login">로그인</a></p>
+            <p class="login_link">비밀번호를 잊으셨나요?<a href="/selogin/findPW" id="show-findPW">PW 초기화</a></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

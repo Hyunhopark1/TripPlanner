@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Index - Squadfree Bootstrap Template</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    {{>layout/linkcss}}
+</head>
+
+<body class="index-page">
+{{>layout/headermenu}}
+
+<main class="main">
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero section accent-background">
+
+        <img src="/assets/img/pexels-photo-869258.jpeg" alt="" data-aos="fade-in">
+
+        <div class="container text-center col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+            <h2>상상만 하던 여행을 현실로</h2>
+            <p>SB_Trip</p>
+            <a href="#portfolio" class="btn-scroll" title="Scroll Down"><i class="bi bi-chevron-down"></i></a>
+        </div>
+
+    </section><!-- /Hero Section -->
+
+    <!-- portfolio Section -->
+    <section id="portfolio" class="portfolio section">
+        <!-- Section Title -->
+        <div class="container section-title" data-aos="fade-up">
+            <h2>지역별 관광 장소를 소개합니다.</h2>
+            <p>하단의 이동하기를 눌러 원하는 여행지를 찾아보세요!</p>
+        </div><!-- End Section Title -->
+        <div class="container">
+                <div class="row gy-4 isotope-container aos-init aos-animate" data-aos="fade-up" data-aos-delay="200" id="photoGrid" style="position: relative">
+                    <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
+                        <img src="http://tong.visitkorea.or.kr/cms/resource/91/2643991_image2_1.JPG" class="img-fluid" alt="사진 61680">
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <img src="http://tong.visitkorea.or.kr/cms/resource/30/2726930_image2_1.jpg" class="img-fluid" alt="사진 61679">
+                    </div>
+                    <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
+                        <img src="http://tong.visitkorea.or.kr/cms/resource/87/1954887_image2_1.jpg" class="img-fluid" alt="사진 61678">
+                    </div>
+                    <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
+                        <img src="http://tong.visitkorea.or.kr/cms/resource/44/1971544_image2_1.jpg" class="img-fluid" alt="사진 61676">
+                    </div>
+                    <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
+                        <img src="http://tong.visitkorea.or.kr/cms/resource/16/3304616_image2_1.jpeg" class="img-fluid" alt="사진 61675">
+                    </div>
+                    <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
+                        <img src="http://tong.visitkorea.or.kr/cms/resource/44/3111744_image2_1.JPG" class="img-fluid" alt="사진 61674">
+                    </div>
+                </div>
+                <div id="spot-container">
+                    <div class="navigation-buttons">
+                        <button id="prevButton"><</button>
+                        <button id="nextButton">></button>
+                    </div>
+                    <button class="move-button" onclick="location.href='/spot/spot_search'" id="moveButton">이동하기</button>
+                </div>
+            </div>
+        </div>
+    </section><!-- /portfolio Section -->
+
+    <!-- Team Section -->
+    <section id="team" class="team section">
+
+        <!-- Section Title -->
+        <div class="container section-title" data-aos="fade-up">
+            <h2>Team</h2>
+        </div><!-- End Section Title -->
+
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+            <div class="row gy-5">
+
+                <div class="col-xl-4 col-md-6 d-flex" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="team-member">
+                        <div class="member-img">
+                            <img src="/assets/img/team/team-1.jpg" class="img-fluid" alt="">
+                        </div>
+                        <div class="member-info">
+                            <div class="social">
+                                <a href="mailto:tjsdn8963@naver.com"><i class="bi bi-send-arrow-down"></i></a>
+                            </div>
+                            <h4>박 선 우</h4>
+                            <span>리더 : 공공 관광 데이터 수집</span>
+                        </div>
+                    </div>
+                </div><!-- End Team Member -->
+
+                <div class="col-xl-4 col-md-6 d-flex" data-aos="zoom-in" data-aos-delay="400">
+                    <div class="team-member">
+                        <div class="member-img">
+                            <img src="/assets/img/team/team-2.jpg" class="img-fluid" alt="">
+                        </div>
+                        <div class="member-info">
+                            <div class="social">
+                                <a href="mailto:phh1569@nate.com"><i class="bi bi-send-arrow-down"></i></a>
+                            </div>
+                            <h4>박 현 호</h4>
+                            <span>부리더 : 게시판 종합</span>
+                        </div>
+                    </div>
+                </div><!-- End Team Member -->
+
+                <div class="col-xl-4 col-md-6 d-flex" data-aos="zoom-in" data-aos-delay="600">
+                    <div class="team-member">
+                        <div class="member-img">
+                            <img src="/assets/img/team/team-3.jpg" class="img-fluid" alt="">
+                        </div>
+                        <div class="member-info">
+                            <div class="social">
+                                <a href="mailto:sun001017@naver.com"><i class="bi bi-send-arrow-down"></i></a>
+                            </div>
+                            <h4>이 선 호</h4>
+                            <span>개발 : 관광 데이터 검색, 플래너 서브</span>
+                        </div>
+                    </div>
+                </div><!-- End Team Member -->
+
+                <div class="col-xl-4 col-md-6 d-flex" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="team-member">
+                        <div class="member-img">
+                            <img src="/assets/img/team/team-1.jpg" class="img-fluid" alt="">
+                        </div>
+                        <div class="member-info">
+                            <div class="social">
+                                <a href="mailto:alstjdrla78@gmail.com"><i class="bi bi-send-arrow-down"></i></a>
+                            </div>
+                            <h4>김 성 민</h4>
+                            <span>개발 : 회원가입, 로그인, 플래너 서브</span>
+                        </div>
+                    </div>
+                </div><!-- End Team Member -->
+
+                <div class="col-xl-4 col-md-6 d-flex" data-aos="zoom-in" data-aos-delay="400">
+                    <div class="team-member">
+                        <div class="member-img">
+                            <img src="/assets/img/team/team-2.jpg" class="img-fluid" alt="">
+                        </div>
+                        <div class="member-info">
+                            <div class="social">
+                                <a href="mailto:pobyjun@naver.com"><i class="bi bi-send-arrow-down"></i></a>
+                            </div>
+                            <h4>강 준 서</h4>
+                            <span>개발 : 플래너 상세</span>
+                        </div>
+                    </div>
+                </div><!-- End Team Member -->
+
+                <div class="col-xl-4 col-md-6 d-flex" data-aos="zoom-in" data-aos-delay="600">
+                    <div class="team-member">
+                        <div class="member-img">
+                            <img src="/assets/img/team/team-3.jpg" class="img-fluid" alt="">
+                        </div>
+                        <div class="member-info">
+                            <div class="social">
+                                <a href="mailto:yym5066666666@gmail.com"><i class="bi bi-send-arrow-down"></i></a>
+                            </div>
+                            <h4>김 민 준</h4>
+                            <span>개발 : 게시판 서브</span>
+                        </div>
+                    </div>
+                </div><!-- End Team Member -->
+
+            </div>
+
+        </div>
+
+    </section><!-- /Team Section -->
+
+
+
+</main>
+{{>layout/footer}}
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+{{>layout/scripts}}
+</body>
+
+<!-- 지역별 관광 명소 사진 js -->
+<script>
+    let currentPage = 1;
+    let maxPageCount = 5; // 최대 페이지 수
+    // 초기 페이지 로드
+    $(function () {
+        loadPhotos(currentPage);
+    });
+
+    function loadPhotos(page) {
+        $.ajax({
+            url: "/spot/photos/" + page + "/s/0/0",
+            method: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                const photoGrid = $('#photoGrid');
+                photoGrid.empty(); // 이전 사진들 제거
+
+                const spotList = response.responseData.dataList // 'responseData' 필드에서 사진 목록 가져오기
+
+                if (!Array.isArray(spotList) || spotList.length === 0) {
+                    photoGrid.append(`<p>사진이 없습니다.</p>`);
+                } else {
+                    spotList.forEach(spot => {
+                        photoGrid.append(`
+                <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
+                    <img src="${spot.firstimage}" class="img-fluid" alt="사진 ${spot.id}" style="width: 100%; height: 300px;">
+                </div>`);
+                    });
+                }
+            },
+            error: function () {
+                alert('사진을 불러오는 데 실패했습니다.');
+            }
+        });
+    }
+
+    function myPlannerBtn(planId) {
+        window.location.href = `/planners/spots/${planId}`;
+    }
+
+    $('#nextButton').on('click', function () {
+        if (currentPage === maxPageCount) {
+            currentPage = 1; // 마지막 페이지에서 next를 클릭하면 첫 페이지로 이동
+        } else {
+            currentPage++;
+        }
+        loadPhotos(currentPage);
+    });
+
+    $('#prevButton').on('click', function () {
+        if (currentPage === 1) {
+            currentPage = maxPageCount; // 첫 페이지에서 prev를 클릭하면 마지막 페이지로 이동
+        } else {
+            currentPage--;
+        }
+        loadPhotos(currentPage);
+    });
+
+    // 이동하기 버튼
+    $('#moveButton').on('click', function () {
+        window.location.href = '/spot/spot_search';
+    });
+</script>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 보기</title>
+    <link rel="stylesheet" href="/board/css/board_view.css">
+    <link href="/common/css/main.css" rel="stylesheet">
+    <script language="JavaScript" src="/js/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="/board/css/board_list.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    {{>layout/linkcss}}
+</head>
+<body class="index-page">
+{{>layout/headermenu}}
+<main class="main">
+    <section id="background" class="section">
+        <div class="container mx-auto py-16 px-2">
+            <div class="board-container bg-white shadow-md rounded-lg p-3">
+                <!-- 게시글 뷰 헤더 -->
+                <div class="outLine">
+                    <!-- boardFree 테이블의 id이자 boardComment 테이블의 boardId -->
+                    <input type="hidden" id="id" name="id" value="{{boardFreeDto.id}}">
+                    <!-- boardComment 테이블의 tbl -->
+                    <input type="hidden" id="tbl" name="tbl" value="{{tbl}}">
+                    <div class="boardMainBtn" onclick="location.href='/boardFree/board_list?page=1&searchName='">자유 게시판 ></div>
+                    <!-- 글 제목 -->
+                    <div id="title">{{boardFreeDto.title}}</div>
+                    <!-- 작성자 정보 -->
+                    <div id="createInfo">
+                        <!-- 작성자 프로필 사진-->
+                        <a href="/"> <img src="/board/user_icon.png" width="36px" height="36px"></a>
+                        <div class="creator">
+                            <!-- 작성자 닉네임 -->
+                            <div class="createName">{{boardFreeDto.createName}}</div>
+                            <!-- 작성일 & 조회수 -->
+                            <div class="createDt-and-viewQty">
+                                <span>{{boardFreeDto.createDt}}</span>
+                                <span>조회  &nbsp;{{boardFreeDto.viewQty}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 게시글 뷰 컨테이너 -->
+                <div class="view-container">
+                    <!-- 글 사진 -->
+                    {{#files}}
+                    <div>
+                        <img src="/api/v1/boardfile/viewimage/{{id}}" alt="{{name}}"/>
+                    </div>
+                    {{/files}}
+                    <!-- 글 내용 -->
+                    <div id="content" data-content="{{boardFreeDto.content}}"></div>
+                    <!-- 좋아요 -->
+                    <div class="p-4 grid place-items-center no-border rounded mt-4">
+                        <div class="flex items-center">
+                            <img id="likeIcon" alt="like_qty" onclick="$.likeItem({{boardFreeDto.id}});" width="36px" height="36px">
+                            <span id="likeQty">{{boardFreeDto.likeQty}}</span>
+                        </div>
+                    </div>
+                    <!-- 수정,삭제 -->
+                    <div id="modifyDeleteBtns" class="flex justify-end mb-3 hidden">
+                        <button id="modifyBtn" onclick="location.href='/boardFree/board_modify?id={{boardFreeDto.id}}&board=free'">수정</button>
+                        <button id="deleteBtn" onclick="$.boardDelete({{boardFreeDto.id}});">삭제</button>
+                    </div>
+                    <div class="outLine m-3"></div>
+                </div>
+                <!-- 댓글 -->
+                <div class="comment-title">댓글 <span id="commentCount">0</span></div>
+
+                <!-- 댓글 리스트 -->
+                <div id="commentList"></div>
+
+                <!-- 댓글추가 -->
+                <div class="comment-box">
+                    <!-- 로그인 유저 닉네임 -->
+                    <div>{{sb3.nickname}}</div>
+                    <fieldset>
+                        <!-- boardComment 테이블의 comment -->
+                        <textarea id="comment" class="comment-text" type="text" name="comment" maxlength="1000"
+                                  placeholder="댓글을 남겨보세요" oninput="handleResizeHeight(this);"
+                                  onkeydown="handleEnter(event);"></textarea>
+                        <button id="addComment" class="comment-button" onclick="$.addComment();">댓글 추가</button>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{{>layout/footer}}
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+{{>layout/scripts}}
+</body>
+<script>
+    // 로드 후 실행
+    window.onload = function () {
+        setCreateUserByButton();
+        setContentInnerHTML();
+        $.getBoardCommentList();
+        let selfLike = "{{boardFreeDto.updateDt}}" * 1;
+        var unlikeIcon = "/board/unlike_icon.png";
+        var likeIcon = "/board/like_icon.png";
+        $("#likeIcon").attr("src", (selfLike > 0 ? likeIcon : unlikeIcon));
+        $("#heartIcon").text(heartIcon);
+        textarea.style.height = '24px';
+    };
+
+    // content에 HTML 텍스트로 변경
+    function setContentInnerHTML() {
+        var content = document.getElementById('content').getAttribute('data-content');
+
+        document.getElementById('content').innerHTML = content;
+    }
+    // 수정 삭제 버튼 존재 여부
+    function setCreateUserByButton() {
+        const createName = "{{boardFreeDto.createName}}";
+        const loggedInUser = "{{sb3.nickname}}";
+        const modifyDeleteBtns = document.getElementById('modifyDeleteBtns');
+
+        if (createName === loggedInUser) {
+            modifyDeleteBtns.classList.remove('hidden');
+        }
+    }
+
+    // 댓글 자동 줄바꿈
+    function handleResizeHeight(textarea) {
+        textarea.style.height = '24px';
+        var newHeight = Math.max(textarea.scrollHeight, 24);
+        textarea.style.height = newHeight + 'px';
+    }
+
+    // 엔터 보내기
+    function handleEnter(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            $.addComment();
+        }
+    }
+
+    // 댓글 추가
+    $.addComment = function () {
+        let id = $("#id").val();
+        let comment = $("#comment").val().trim().replace(/\n/g, "<br>");
+        let tbl = $("#tbl").val();
+
+        if (comment === "") {
+            alert("댓글 내용을 입력해주세요.");
+            return;
+        }
+        if (!confirm("댓글을 추가 하시겠습니까?")) {
+            return;
+        }
+        $.ajax({
+            url: "/api/v1/comment",
+            type: "POST",
+            dataType: "JSON",
+            data: JSON.stringify({"comment": comment, "boardId": id, "tbl": tbl}),
+            contentType: "application/json; charset=UTF-8",
+        }).done(function (data, status, xhr) {
+            console.log("done: data=", data, ", status=", status, ", xhr=", xhr);
+            $("#comment").val(""); // textarea 비우기
+            $.getBoardCommentList(id, true);
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("fail: jqXHR=", jqXHR, ", status=", status, ", errorThrown=", errorThrown);
+            let message = getErrorMessage(jqXHR.responseJSON);
+            alert("댓글 추가를 실패했습니다. " + message);
+        });
+    }
+
+    // 댓글 삭제
+    $.deleteComment = (id) => {
+        if (id <= 0) {
+            return;
+        }
+        if (!confirm("댓글을 삭제 하시겠습니까 ?")) {
+            return;
+        }
+        $.ajax({
+            url: "/api/v1/comment/deleteYn/" + id,
+            type: "DELETE",
+            datatype: "JSON",
+            data: JSON.stringify({"id": id}),
+            contentType: "application/json; charset=UTF-8",
+        }).done(function (data, status, xhr) {
+            console.log("done:data=" + data + ", status=", status, ", xhr=", xhr);
+            if (status === "success") {
+                $.getBoardCommentList();
+            }
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("done:jqXHR=" + jqXHR + ", status=", status, ", errorThrown=", errorThrown);
+            alert("댓글 삭제 실패 했습니다. " + jqXHR.responseJSON.message);
+        });
+    }
+
+    // 댓글 삭제 표시
+    $.deleteCommentLikeItem = (id) => {
+        $("#likeList_" + id).remove();
+    }
+
+    // 댓글 수정
+    $.updateComment = (id) => {
+        if (id <= 0) {
+            return;
+        }
+        let comment = $("#comment_" + id).val().trim().replace(/\n/g, "<br>");
+        let boardId = $("#id").val();
+        if (!comment || comment === "") {
+            alert("댓글 내용을 입력하세요.");
+            return;
+        }
+
+        $.ajax({
+            url: "/api/v1/comment/" + id,
+            type: "PATCH",
+            datatype: "json",
+            data: JSON.stringify({"id": id, "comment": comment, "boardId": boardId}),
+            contentType: "application/json; charset=UTF-8",
+        }).done(function (data) {
+            console.log("done:data=", data);
+            $.getBoardCommentList(data.responseData); // 댓글 리스트 새로고침
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("fail:jqXHR=", jqXHR, ", status=", status, ", errorThrown=", errorThrown);
+            alert("댓글 수정 실패 했습니다. " + jqXHR.responseJSON.message);
+        });
+    }
+
+    // 수정 변경
+    $.modifyComment = function (id) {
+        let commentContainer = $(`#likeList_${id}`);
+
+        // 텍스트 영역과 수정 버튼 보여주기
+        commentContainer.find('.comment-text').removeClass('hidden');
+        commentContainer.find('.comment-button').removeClass('hidden');
+        commentContainer.find('.hidden-not').addClass('hidden');
+
+        // textarea의 높이를 내용에 맞게 조정
+        let textarea = commentContainer.find('.comment-text')[0];
+        handleResizeHeight(textarea);
+    }
+
+
+    // 댓글 조회
+    $.getBoardCommentList = function () {
+        let id = $("#id").val();
+        let tbl = $("#tbl").val();
+        let commentId = $("#commentId").val();
+
+        $.ajax({
+            url: "/api/v1/comment/findbyboardidtbl",
+            type: "POST",
+            datatype: "JSON",
+            data: JSON.stringify({"boardId": id, "tbl": tbl}),
+            contentType: "application/json; charset=UTF-8",
+        }).done(function (data, status, xhr) {
+            console.log("done:data=" + data + ", status=", status, ", xhr=", xhr);
+            if (status === "success") {
+                let commentCount = data.responseData.length;
+                $("#commentCount").text(`${commentCount}`);
+                // 댓글 성공하면 댓글 리스트 다시 조회
+                $.showBoardCommentList(data.responseData);
+            }
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("done:jqXHR=" + jqXHR + ", status=", status, ", errorThrown=", errorThrown);
+            alert("댓글 보기 실패했습니다. " + jqXHR.responseJSON.message);
+        });
+    }
+
+
+    // 댓글 표시
+    $.showBoardCommentList = function (commentList) {
+        if (commentList == null) {
+            return;
+        }
+
+        // 댓글 목록을 ID 기준으로 정렬
+        commentList.sort((a, b) => a.id - b.id);
+
+        let list = $("#commentList");
+        list.children().remove();
+
+        let commentListHeader = "";
+        list.append(commentListHeader);
+
+        let html = "";
+
+        for (const commentItem of commentList) {
+            let id = commentItem.id;
+            let comment = commentItem.comment;
+            let commentId = commentItem.commentId;
+            let likeQty = commentItem.likeQty;
+            let createDt = commentItem.createDt;
+            let updateDt = commentItem.updateDt;
+            let createId = commentItem.createId;
+            let createName = commentItem.createName;
+            const nickname = "{{sb3.nickname}}";
+            let rowClass = "row";
+            let deleteBar;
+
+            let displayDate = updateDt ? updateDt : createDt;
+
+            let displayText = updateDt ? `${comment.replace(/\n/g, "<br>")} <span class="update-text">(수정됨)</span>` : comment.replace(/\n/g, "<br>");
+
+            if (createName === nickname) {
+                rowClass += " highlight-comment";
+                deleteBar = `<div class='option add-option' onclick='$.modifyComment(${id})'>수정</div>
+                                <div class='option add-option' onclick='$.deleteComment(${id})'>삭제</div>`;
+            } else {
+                deleteBar = "";
+            }
+
+            let heartIcon = (commentId === undefined || commentId === null) ? "/svg/heartOff.svg" : "/svg/heartOn.svg";
+
+            html +=
+                `<div id='likeList_${id}' class='comment-list ${rowClass}'>
+                    <div id="comment-image"><img src='/board/user_icon.png' class='profile-image' alt='Profile' width='100%' height='100%'></div>
+                    <div class="comment-have">
+                        <div class="comment-userName">${createName}</div>
+                        <fieldset>
+                            <span id='dropdown' class='dropdown'>
+                            <div id='dropdownButton_${id}' class='dropdown-button hidden-not'>•••</div>
+                            <div id='dropdownContent_${id}' class='dropdown-content'>
+                                ` + deleteBar + `
+                            </div>
+                            </span>
+                            <div class="display-text hidden-not">${displayText}</div>
+                            <textarea id="comment_${id}" type="text" class="comment-text highlight-comment hidden" name="comment" maxlength="1000" placeholder="${comment}" oninput="handleResizeHeight(this);">${comment.replace(/<br>/g, "\n")}</textarea>
+
+                        </div>
+                        <div class="comment-bottom">
+                            <span class="display-date hidden-not">${displayDate}</span>
+                            <span class="comment-like"'>
+                                <img class="comment-likeicon hidden-not" id='heartIcon_${id}' src='${heartIcon}' width='20px' alt='Like' onClick='$.likeComment(${id}, this);'/>
+                                <span class="hidden-not">&nbsp;${likeQty}</span>
+                            </span>
+                            <button id="updateComment_${id}" class="comment-button comment-modify hidden" onclick="$.updateComment(${id});">수정</button>
+                            <button id="cancelEdit" class="comment-button comment-cancel hidden" onclick="$.cancelEdit(${id});">취소</button>
+                        </fieldset>
+                    </div>
+                </div>`;
+        }
+        list.append(html);
+    }
+
+    // 취소 버튼
+    $.cancelEdit = function (id) {
+        let commentContainer = $(`#likeList_${id}`);
+
+        // 수정 모드를 취소하고 원래 상태로 복귀
+        commentContainer.find('.comment-text').addClass('hidden');
+        commentContainer.find('.comment-button').addClass('hidden');
+        commentContainer.find('.hidden-not').removeClass('hidden');
+    }
+
+    // 게시글 삭제
+    $.boardDelete = function (id) {
+        let ret = confirm("해당 게시글을 삭제 하시겠습니까?");
+        if (ret) {
+            window.location.href = "/boardFree/board_delete?id=" + id;
+        }
+    }
+
+    // 게시글 좋아요
+    $.likeItem = function (id) {
+        let likeIcon = $("#likeIcon");
+        let src = likeIcon.attr("src");
+        let bOff = src.includes("unlike");
+        let url = bOff ? "/api/v1/boardfree/like/" + id : "/api/v1/boardfree/unlike/" + id;
+
+        $.ajax({
+            url: url,
+            type: "GET",
+            datatype: "JSON",
+            contentType: "application/json; charset=UTF-8",
+        }).done(function (data, status, xhr) {
+            console.log("done:data=" + data + ", status=", status, ", xhr=", xhr);
+            if (status === "success") {
+
+                //좋아요 개수 업데이트
+                $("#likeQty").text(data.responseData.likeQty);
+
+                // 좋아요 상태에 따른 아이콘 업데이트
+                let count = data.responseData.updateDt * 1;
+                if (count > 0) {
+                    likeIcon.attr("src", "/board/like_icon.png");
+                } else {
+                    likeIcon.attr("src", "/board/unlike_icon.png");
+                }
+            }
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("done:jqXHR=" + jqXHR + ", status=", status, ", errorThrown=", errorThrown);
+            alert("실패 했습니다. " + jqXHR.responseJSON.message);
+        });
+    }
+
+    //댓글 좋아요
+    $.likeComment = (id) => {
+        if (id <= 0) {
+            return;
+        }
+
+        let heartIcon = $("#heartIcon_" + id);
+        let currentIconSrc = heartIcon.attr("src");
+
+        if (currentIconSrc.includes("heartOff.svg")) {
+            $.ajax({
+                url: "/api/v1/comment/like/" + id,
+                type: "GET",
+                datatype: "JSON",
+                contentType: "application/json; charset=UTF-8",
+            }).done(function (data, status, xhr) {
+                console.log("done:data=" + data + ", status=", status, ", xhr=", xhr);
+                if (status === "success") {
+                    heartIcon.attr("src", "/svg/heartOn.svg");
+                    // 좋아요 성공하면 댓글 리스트 다시 조회
+                    $.getBoardCommentList(data.responseData);
+                }
+            }).fail(function (jqXHR, status, errorThrown) {
+                console.log("done:jqXHR=" + jqXHR + ", status=", status, ", errorThrown=", errorThrown);
+                alert("Like 실패 했습니다. " + jqXHR.responseJSON.message);
+            });
+        } else {
+            $.ajax({
+                url: "/api/v1/comment/unlike/" + id,
+                type: "GET",
+                datatype: "JSON",
+                contentType: "application/json; charset=UTF-8",
+            }).done(function (data, status, xhr) {
+                console.log("done:data=" + data + ", status=", status, ", xhr=", xhr);
+                if (status === "success") {
+                    heartIcon.attr("src", "/svg/heartOff.svg");
+                    $.getBoardCommentList(data.responseData);
+                }
+            }).fail(function (jqXHR, status, errorThrown) {
+                console.log("done:jqXHR=" + jqXHR + ", status=", status, ", errorThrown=", errorThrown);
+                alert("UnLike 실패 했습니다. " + jqXHR.responseJSON.message);
+            });
+        }
+    }
+</script>
+</html>

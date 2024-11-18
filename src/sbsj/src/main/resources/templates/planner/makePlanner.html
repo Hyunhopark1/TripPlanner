@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P03</title>
+
+    {{>layout/linkcss}}
+    <style>
+        .planner-title {
+            font-size: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+            color:black;
+        }
+        .main-layout {
+            display: flex;
+        }
+        .date-list-box {
+            width: 20%;
+            padding: 20px;
+            background-color: #f7f7f7;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-right: 20px;
+        }
+        .date-list-title {
+            font-size: 18px !important;
+            color: #000;
+        }
+        .date-list {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .date-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .date-item.selected {
+            background-color: #0056b3;
+        }
+        .search-box {
+            margin-bottom: 20px;
+        }
+        .search-box input {
+            padding: 10px;
+            width: 300px;
+            font-size: 16px;
+        }
+        .search-box button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .search-results {
+            margin-top: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .search-results p {
+            padding: 10px;
+            cursor: pointer;
+            color: black;
+        }
+        .search-results p:hover {
+            background-color: #f0f0f0;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .memo-box {
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .save-btn {
+            display: inline-block;
+            margin: 10px 5px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .close-btn {
+            display: inline-block;
+            margin: 10px 5px;
+            padding: 10px 15px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .added-places {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+        .place-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            color: black; /* 글씨 색상 검은색으로 변경 */
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .add-spot-button {
+            display: inline-block;
+            margin: 10px 5px;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .del-spot-button {
+            display: inline-block;
+            margin: 10px 5px;
+            padding: 10px 15px;
+            background-color: #e685b5;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .back-button {
+            display: inline-block;
+            margin: 10px 5px;
+            padding: 10px 15px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="index-page">
+{{>layout/headermenu}}
+<!-- 상단 바 -->
+<main class="main">
+    <section id="hero" class="hero section accent-background">
+        <img src="/assets/img/pexels-photo-869258.jpeg" alt="" data-aos="fade-in" style="width: 100%;">
+        <div class="container main-layout" data-aos="fade-up" data-aos-delay="100">
+            <div class="date-list-box">
+                <h2 class="date-list-title">일정 날짜 선택</h2>
+                <div class="date-list" id="dateList"></div>
+            </div>
+
+            <div style="flex: 1;">
+                <h1 class="planner-title">일정 및 명소 검색</h1>
+
+                <!-- 명소 검색 박스 -->
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="명소를 검색하세요" onkeydown="if(event.key === 'Enter'){searchSpotTitle();}">
+                    <button id="search-btn" onclick="searchSpotTitle()">검색</button>
+                </div>
+
+                <!-- 검색 결과 표시 -->
+                <div class="search-results" id="searchResults"></div>
+
+                <!-- 지도 표시 -->
+                <div id="map"></div>
+
+                <!-- 메모 작성란(장소 추가된 후 해당 날짜 아래에 표시) -->
+                <div id="addedPlaces" class="added-places">
+                    <input id="addSpotId" type="text" style="display: none;" readonly></input>
+                    <input id="addMapX" type="text" style="display: none;" readonly></input>
+                    <input id="addMapY" type="text" style="display: none;" readonly></input>
+                    <label for="addTitle" style="color: black">명소 이름</label><input id="addTitle" type="text" style="color: black;" readonly placeholder="방문할 명소"></input>
+                    <label for="addAddr1" style="color: black">명소 주소</label><input id="addAddr1" type="text" style="color: black;" readonly placeholder="방문할 주소"></input>
+                    <label for="addTel" style="color: black">전화번호</label><input id="addTel" type="text" style="color: black;" readonly placeholder="전화번호"></input>
+                    <label for="addMemo" style="color:black">메모</label><textarea id="addMemo" class="memo-box" placeholder="메모를 입력하세요" style=""></textarea>
+                </div>
+
+                <!-- 저장 및 닫기 버튼 -->
+                <div class="action-buttons">
+                    <button class="add-spot-button" id="addSpotBtn" style="display:none;">명소 추가</button>
+                    <button class="del-spot-button" id="deleteSpotBtn" style="display:none;">명소 삭제</button>
+                    <button class="back-button" id="backBtn" >뒤로 가기</button>
+<!--                    <button class="save-btn" id="saveBtn">저장</button>-->
+<!--                    <button class="close-btn" id="closeBtn">닫기</button>-->
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{{>layout/footer}}
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+{{>layout/scripts}}
+</body>
+
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBn7kd5uyu5imiicHU_XWGtRNCDLA35zFM&libraries=places&callback=initMap"></script>
+
+<script>
+    $(document).ready(function () {
+        outSpotList();
+    });
+    let addedSpots = {}; //날짜별로 추가된 명소 저장
+    let planId = "{{planId}}" * 1;
+
+    //Google Maps 관련 설정
+    let map;
+    // let service;
+    // let infoWindow;
+
+    function initMap() {
+        // 지도 초기화
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: {lat: 37.5665, lng: 126.9780}, //서울시청을 기본 위치로 설정
+            zoom: 13,
+        });
+    }
+
+    function viewSpotItem(id, title, mapX, mapY, addr1, tel, spotMemo) {
+        document.getElementById('addSpotBtn').style.display = 'none';
+        document.getElementById('deleteSpotBtn').style.display = 'inline-block';
+        $("#addSpotId").val(id);
+        $("#addMapX").val(mapX);
+        $("#addMapY").val(mapY);
+        $("#addTitle").val(title);
+        $("#addAddr1").val(addr1);
+        $("#addTel").val(tel);
+        $("#addMemo").val(spotMemo);
+        moveToLocation(title, mapX, mapY);
+
+    }
+
+    //검색한 장소의 이름, X값, Y값을 바탕으로 지도 이동
+    function moveToLocation(title, mapX, mapY) {
+        const location = {lat: mapY, lng: mapX};
+        map.setCenter(location);
+
+        new google.maps.Marker({
+            map: map,
+            position: location,
+            title: title,
+        });
+    }
+
+    //검색한 장소의 ID, X값, Y값, 이름, 주소, 전화번호를 바탕으로 지도 이동
+    function choiceSpot(id, mapX, mapY, title, addr1, tel) {
+        moveToLocation(title, mapX, mapY);
+
+        //선택한 명소 정보 저장
+        showSpot(id, mapX, mapY, title, addr1, tel);
+
+        //명소 추가 버튼 표시
+        document.getElementById('addSpotBtn').style.display = 'inline-block';
+        document.getElementById('deleteSpotBtn').style.display = 'none';
+    }
+
+    //검색한 장소의 ID, X값, Y값을 바탕으로 지도 이동
+    function showSpot(id, mapX, mapY, title, addr1, tel) {
+        $("#addSpotId").val(id);
+        $("#addMapX").val(mapX);
+        $("#addMapY").val(mapY);
+        $("#addTitle").val(title);
+        $("#addAddr1").val(addr1);
+        $("#addTel").val(tel);
+        $("#addMemo").val('');
+    }
+
+    //장소의 이름으로 검색해서 찾는 로직
+    function searchSpotTitle() {
+        let page = 1;
+        let rowsOnePage = 20;
+        let title = $("#search-input").val();
+        $.ajax({
+            url: `/spot/findBySpotTitle?page=${page}&rowsOnePage=${rowsOnePage}&title=${title}`,
+            type: "GET",
+            datatype: "JSON",
+            contentType: "application/json; charset=UTF-8",
+        }).done(function (data, status, xhr) {
+            console.log("done:data=" + data + ", status=", status, ", xhr=", xhr);
+            if (status === "success") {
+                const spotList = data.responseData.dataList;
+                const searchResults = $('#searchResults');
+                searchResults.empty();
+
+                spotList.forEach(spot => {
+                    searchResults.append(`
+<div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
+    <div style="color:black; margin-bottom: 3px;" onclick="choiceSpot(${spot.id}, ${spot.mapX}, ${spot.mapY}, '${spot.title}', '${spot.addr1}', '${spot.tel}')">
+        <h4 style="color:black">${spot.title}</h4>
+        <p style="font-size: 16px;">주소: ${spot.addr1}, 전화번호: ${spot.tel ? spot.tel : '정보 없음'}</p>
+    </div>
+</div>`);
+                });
+            }
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("done:jqXHR=" + jqXHR + ", status=", status, ", errorThrown=", errorThrown);
+            alert("실패 했습니다. " + jqXHR.responseJSON.message);
+        });
+    }
+
+    //명소를 선택한 날짜에 추가
+    function addPlaceToSelectedDate() {
+        if (!selectedDate) {
+            alert("날짜를 선택해주세요.");
+            return;
+        }
+
+        const selectedDateText = selectedDate.innerText;
+
+        if(!addedSpots[selectedDateText]) {
+            addedSpots[selectedDateText] = [];
+        }
+        addedSpots[selectedDateText].push({name: selectedPlace.title, address: selectedPlace.addr1});
+
+        //추가한 후 해당 날짜에 추가된 명소 표시
+        updateAddedSpotsForSelectedDate();
+
+        //선택한 명소 정보 초기화
+        selectedPlace = null;
+
+        //명소 추가 버튼 다시 숨김
+        document.getElementById('addSpotBtn').style.display = 'none';
+        document.getElementById('deleteSpotBtn').style.display = 'none';
+    }
+
+    function addSpot() {
+        let spotId = $("#addSpotId").val();
+        let spotMapX= $("#addMapX").val();
+        let spotMapY = $("#addMapY").val();
+        let spotTitle = $("#addTitle").val();
+        let spotAddr1 = $("#addAddr1").val();
+        let spotTel = $("#addTel").val();
+        let addMemo = $("#addMemo").val();
+
+
+        $.ajax({
+            url: `/api/planners/spots`,
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "JSON",
+            data: JSON.stringify({
+                spotDate: "2024-10-01",
+                time: 0,
+                spotMemo: addMemo,
+                whatDay: "-",
+                howFar: 0,
+                spotId: spotId,
+                planId: planId
+            }),
+        }).done(function (data, status, xhr) {
+            console.log("done:data=" + data + ", status=", status, ", xhr=", xhr);
+            if (status === "success") {
+//                 const spotItem = data.responseData;
+//                 let html = `
+// <div class="col-lg-10 col-md-8 date-item" onclick="moveToLocation('${spotTitle}', ${spotMapX}, ${spotMapY})">
+// <div style="font-size: 16px;">${spotTitle}</div>
+// <div style="font-size: 12px;">${addMemo}</div>
+// </div>`;
+//                 $("#dateList").append(html);
+                outSpotList();
+                $("#addSpotId").val('');
+                $("#addMapX").val('');
+                $("#addMapY").val('');
+                $("#addTitle").val('');
+                $("#addAddr1").val('');
+                $("#addTel").val('');
+                $("#addMemo").val('');
+            }
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("done:jqXHR=" + jqXHR + ", status=", status, ", errorThrown=", errorThrown);
+            alert("실패 했습니다. " + jqXHR.responseJSON.message);
+        });
+        // dateList = document.getElementById("dateList");
+        // const dateItem = document.createElement("div");
+        // dateItem.className = "date-item";
+        // dateItem.innerText = spotTitle;
+        // dateItem.onclick = function() {
+        //     moveToLocation(spotTitle, spotMapX, spotMapY);
+        // };
+        // dateList.appendChild(dateItem);
+    }
+
+    function deleteSpot() {
+        let spotId = $("#addSpotId").val();
+
+        $.ajax({
+            url: `/api/planners/spots/` + spotId,
+            type: "DELETE",
+            contentType: "application/json; charset=utf-8",
+            dataType: "JSON",
+        }).done(function (data, status, xhr) {
+            console.log("done:data=" + data + ", status=", status, ", xhr=", xhr);
+            if (status === "success") {
+                outSpotList();
+                $("#addSpotId").val('');
+                $("#addMapX").val('');
+                $("#addMapY").val('');
+                $("#addTitle").val('');
+                $("#addAddr1").val('');
+                $("#addTel").val('');
+                $("#addMemo").val('');
+            }
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("done:jqXHR=" + jqXHR + ", status=", status, ", errorThrown=", errorThrown);
+            alert("실패 했습니다. " + jqXHR.responseJSON.message);
+        });
+    }
+
+    //명소 추가 버튼에 리스너 추가
+    document.getElementById('addSpotBtn').addEventListener('click', addSpot);
+
+    //명소 삭제 버튼에 리스너 추가
+    document.getElementById('deleteSpotBtn').addEventListener('click', deleteSpot);
+
+    // //저장 버튼 기능
+    // document.getElementById("saveBtn").addEventListener("click", function () {
+    //     alert("플래너가 저장되었습니다!");
+    //     //저장 로직 추가 예정
+    // });
+    //
+    // //닫기 버튼 기능
+    // document.getElementById("closeBtn").addEventListener("click", function () {
+    //     window.location.href = "/planner/owner";
+    // });
+
+        //뒤로 가기 버튼
+        document.getElementById("backBtn").addEventListener("click", function () {
+            window.location.href = "/planners/spots/" + planId;
+        });
+
+    function outSpotList() {
+        $.ajax({
+            url: `/api/planners/spots/planner/` + planId,
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "JSON",
+            data: JSON.stringify({
+                planId: planId
+            }),
+        }).done(function (data, status, xhr) {
+            console.log("done:data=" + data + ", status=", status, ", xhr=", xhr);
+            if (status === "success") {
+                const list = data.responseData;
+                $("#dateList").children().remove();
+                list.forEach(spot => {
+                    let id = spot.id;
+                    let spotTitle = spot.title;
+                    let spotMapX = spot.mapX;
+                    let spotMapY = spot.mapY;
+                    let addr1 = spot.addr1;
+                    let tel = spot.tel;
+                    let spotMemo = spot.spotMemo || '';
+
+                let html = `
+<div class="col-lg-10 col-md-8 date-item" onclick="viewSpotItem(${id}, '${spotTitle}', ${spotMapX}, ${spotMapY}, '${addr1}', '${tel}', '${spotMemo}')">
+<div style="font-size: 16px;">${spotTitle}</div>
+<div style="font-size: 12px;">${tel}</div>
+<div style="font-size: 12px;">${spotMemo}</div>
+</div>`;
+                $("#dateList").append(html);
+                });
+            }
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("done:jqXHR=" + jqXHR + ", status=", status, ", errorThrown=", errorThrown);
+            alert("실패 했습니다. " + jqXHR.responseJSON.message);
+        });
+    }
+
+    // 플래너의 시작일과 종료일에 따른 날짜 목록 생성 예시
+    // const startDate = new Date('2024-09-20');
+    // const endDate = new Date('2024-09-25');
+    // let selectedDate = null; //선택된 날짜
+    // let selectedPlace = null; //선택된 명소
+
+    // // 날짜 차이 계산 함수
+    // function getDatesBetween(start, end) {
+    //     const dates = [];
+    //     let currentDate = new Date(start);
+    //     while (currentDate <= end) {
+    //         dates.push(new Date(currentDate));
+    //         currentDate.setDate(currentDate.getDate() + 1);
+    //     }
+    //     return dates;
+    // }
+
+    // // 날짜 목록 생성 및 표시
+    // const dateList = document.getElementById("dateList");
+    // const dates = getDatesBetween(startDate, endDate);
+    //
+    // dates.forEach((date, index) => {
+    //     const dateItem = document.createElement("div");
+    //     dateItem.className = "date-item";
+    //     dateItem.innerText = `${index + 1}일차 - ${date.toLocaleDateString()}`;
+    //     dateItem.onclick = function() {
+    //         if (selectedDate) {
+    //             selectedDate.classList.remove("selected");
+    //         }
+    //         selectedDate = dateItem;
+    //         dateItem.classList.add("selected");
+    //
+    //         //해당 날짜에 추가된 명소 표시
+    //         updateAddedSpotsForSelectedDate();
+    //     };
+    //     dateList.appendChild(dateItem);
+    // });
+
+    // //날짜에 추가된 명소 업데이트 함수
+    // function updateAddedSpotsForSelectedDate() {
+    //     const addedPlaces = document.getElementById("addedPlaces");
+    //     addedPlaces.innerHTML = '';
+    //     const places = addedSpots[selectedDate.innerText] || []; //해당 날짜에 추가된 명소 리스트
+    //
+    //     places.forEach(place => {
+    //         const placeItem = document.createElement("div");
+    //         placeItem.className = "place-item";
+    //         placeItem.innerHTML = `
+    //             <h3 style="color: black;">${place.name}</h3>
+    //             <p style="color: black;">${place.address}</p>
+    //             <textarea class="memo-box" placeholder="메모를 입력하세요"></textarea>
+    //         `;
+    //         addedPlaces.appendChild(placeItem);
+    //     });
+    // }
+
+    //     //InfoWindow 생성
+    //     infoWindow = new google.maps.InfoWindow();
+    //
+    //     // 검색 버튼 클릭 시 명소 검색
+    //     document.getElementById("search-btn").addEventListener("click", function () {
+    //         const query = document.getElementById("search-input").value;
+    //         if (query) {
+    //             searchPlace(query);
+    //         }
+    //     });
+    // }
+
+    // // 명소 검색 함수(Google Places API 사용)
+    // function searchPlace(query) {
+    //     const request = {
+    //         query: query,
+    //         fields: ['place_id', 'name', 'geometry', 'formatted_address', 'photos'],
+    //     };
+    //
+    //     service = new google.maps.places.PlacesService(map);
+    //     service.findPlaceFromQuery(request, function (results, status) {
+    //         document.getElementById('searchResults').innerHTML = '';
+    //         if (status === google.maps.places.PlacesServiceStatus.OK) {
+    //             if (results.length === 1) {
+    //                 const place = results[0];
+    //                 addMarkerAndMoveMap(place);
+    //             } else {
+    //                 displayPlaceOptions(results);
+    //             }
+    //         } else {
+    //             alert("명소를 찾을 수 없습니다.");
+    //         }
+    //     });
+    // }
+
+    // //검색 결과 표시 (Google Places Api 사용)
+    // function displayPlaceOptions(places) {
+    //     const searchResults = document.getElementById("searchResults");
+    //     searchResults.innerHTML = ''; //기존 검색 결과 초기화
+    //     places.forEach(place => {
+    //         const resultItem = document.createElement("p");
+    //         resultItem.innerText = `${place.name} (${place.formatted_address})`;
+    //         resultItem.onclick = function () {
+    //             addMarkerAndMoveMap(place);
+    //         };
+    //         searchResults.appendChild(resultItem);
+    //     });
+    // }
+
+    // //Google Places API를 통해 불러온 장소로 이동하고 그 장소의 정보를 infoWindow에 표시
+    // function addMarkerAndMoveMap(place) {
+    //     map.setCenter(place.geometry.location);
+    //     new google.maps.Marker({
+    //         map: map,
+    //         position: place.geometry.location,
+    //     });
+    //
+    //     service.getDetails({placeId: place.place_id}, function (placeDetails, status) {
+    //         if (status === google.maps.places.PlacesServiceStatus.OK) {
+    //             const photoUrl = placeDetails.photos && placeDetails.photos.length > 0
+    //                 ? placeDetails.photos[0].getUrl({maxWidth: 400, maxHeight: 300})
+    //                 : '';
+    //             infoWindow.setContent(`
+    //                 <div style="max-width: 300px;">
+    //                     ${photoUrl ? `<img src="${photoUrl}" alt="${placeDetails.name}" style="width: 100%; height: auto;">` : ''}
+    //                     <h3>${placeDetails.name}</h3>
+    //                     <p>${placeDetails.formatted_address}</p>
+    //                     <p>평점: ${placeDetails.rating}</p>
+    //                     <p>전화번호: ${placeDetails.formatted_phone_number}</p>
+    //                     <p>영업시간: ${placeDetails.opening_hours ? placeDetails.opening_hours.weekday_text.join('<br>') : '정보 없음'}</p>
+    //                 </div>
+    //             `);
+    //             infoWindow.open(map);
+    //
+    //             // 장소 추가 버튼 표시
+    //             document.getElementById('addSpotBtn').style.display = 'inline-block'; // 지도 밑에 명소 추가 버튼 표시
+    //             document.getElementById('addSpotBtn').onclick = function () {
+    //                 addPlaceToSelectedDate(placeDetails.name, placeDetails.formatted_address);
+    //             };
+    //         }
+    //     });
+    // }
+</script>
+</html>

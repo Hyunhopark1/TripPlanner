@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>플래너 수정</title>
+    {{>layout/linkcss}}
+    <style>
+        .labelFontColor {
+            color: #2a2f3e;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            margin-bottom: 20px; /* 여백 추가 */
+            box-sizing: border-box; /* 패딩 포함 */
+        }
+
+        button {
+            background-color: #4b99bb; /* 블루 배경 */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3; /* 호버 시 색상 변경 */
+        }
+
+        .flex {
+            display: flex;
+            justify-content: flex-end; /* 오른쪽 정렬 */
+            margin-top: 20px; /* 여백 추가 */
+        }
+
+        .btn-gap {
+            position: relative; /* 고정된 위치가 아니라, 페이지 맨 아래 배치 */
+            display: flex;
+            justify-content: flex-end; /* 버튼을 우측 정렬 */
+            gap: 10px; /* 버튼 간격 */
+            margin-top: 30px; /* 위쪽에 약간의 여백 추가 */
+            padding-bottom: 20px; /* 하단 여백 추가 */
+        }
+
+        #delete-btn {
+            background-color: red;
+        }
+
+        #delete-btn:hover {
+            background-color: #842029; /* 호버 시 색상 변경 */
+        }
+    </style>
+</head>
+<body class="index-page">
+{{>layout/headermenu}}
+<!-- 상단 바 -->
+<main class="main">
+    <section id="container" class="section accent-background" style="background-image: url('/assets/img/pexels-photo-869258.jpeg'); background-size: cover; background-position: center;">
+        <div class="container">
+            <div id="myIframe">
+                <h1 class="add-title">플래너 작성</h1>
+                <form id="postForm" name="postForm" method="post" action="/planner/planner_update"
+                      onsubmit="return handleSubmit();" style="height: calc(100% - 120px)"
+                      class="p-4 bg-white no-border rounded">
+                    <input type="hidden" id="id" name="id" value="{{plannerDto.id}}"/>
+                    <input type="hidden" id="userId" name="userId" value="{{plannerDto.userId}}"/>
+
+                    <!-- 제목 -->
+                    <label for="title" class="labelFontColor">제목</label>
+                    <input type="text" id="title" name="title"
+                           class="mb-4 full-width p-4 border border-gray-300 rounded" placeholder="제목을 입력하세요"
+                           value="{{plannerDto.title}}" required>
+
+                    <!-- 기간 -->
+                    <div>
+                        <label for="startDate" class="labelFontColor">시작일</label>
+                        <input type="date" id="startDate" name="startDate" min="" value="{{plannerDto.startDate}}"/>
+                        <label for="endDate" class="labelFontColor">종료일</label>
+                        <input type="date" id="endDate" name="endDate" min="" value="{{plannerDto.endDate}}"/>
+                    </div>
+
+                    <!-- 인원 -->
+                    <label for="people" class="labelFontColor">인원</label>
+                    <input type="number" id="people" name="people"
+                           class="mb-4 border border-gray-300 p-4 rounded-lg" value="{{plannerDto.people}}">
+                    <p></p>
+
+                    <!-- 메모 -->
+                    <label for="memo" class="labelFontColor">메모</label>
+                    <input type="text" id="memo" name="memo" class="mb-4 border border-gray-300 p-4 rounded-lg"
+                           value="{{plannerDto.memo}}"/>
+
+                    <!-- 하단 바 -->
+                    <div class="flex justify-between items-center">
+                        <div class="btn-gap">
+                            <div>
+                                <button type="button" onclick="goBack()"
+                                        class="bg-blue-500 px-6 py-3 rounded-full text-lg">취소
+                                </button>
+                            </div>
+                            <div>
+                                <button type="submit"
+                                        class="bg-blue-500 px-6 py-3 rounded-full text-lg">수정
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" onclick="$.plannerDelete();" id="delete-btn"
+                                        class="bg-blue-500 px-6 py-3 rounded-full text-lg">삭제
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+{{>layout/footer}}
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+{{>layout/scripts}}
+</body>
+<script>
+    function goBack() {
+        window.history.back();
+    }
+
+    // 제목과 내용의 길이 제한 설정
+
+    let titleMinLength = 2;
+    let titleMaxLength = 100;
+    let memoMinLength = 2;
+    let memoMaxLength = 1000;
+
+    function handleSubmit() {
+        // 제목과 내용 가져오기
+        let title = document.getElementById("title").value;
+        let startDate = document.getElementById("startDate").value;
+        let endDate = document.getElementById("endDate").value;
+        let people = document.getElementById("people").value;
+        let memo = $("#memo").val();
+
+        // 제목과 내용의 길이 검사
+        if (title.length < titleMinLength || title.length > titleMaxLength) {
+            alert("제목은 " + titleMinLength + "자에서 " + titleMaxLength + "자 사이로 입력해 주세요.");
+            return false;
+        }
+        if (startDate > endDate) {
+            alert("시작일[" + startDate + "]은 종료일[" + endDate + "]보다 빨라야 합니다.");
+            return false;
+        }
+        if (people * 1 <= 0) {
+            alert("인원[" + people + "]은 1명 이상 이어야 합니다.");
+            return false;
+        }
+        if (memo.length < memoMinLength || memo.length > memoMaxLength) {
+            alert("내용은 " + memoMinLength + "자에서 " + memoMaxLength + "자 사이로 입력해 주세요.");
+            return false;
+        }
+        return true;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    $('#startDate').attr('min', today);
+    $('#endDate').attr('min', today);
+    $('#startDate').val(today);
+    $('#endDate').val(today);
+
+    $.plannerDelete = function () {
+        if (!confirm("작성한 플래너를 삭제하시겠습니까 ?")) {
+            return;
+        }
+        $.ajax({
+            url: "/api/planner/{{plannerDto.id}}",
+            type: "DELETE",
+            dataType: "JSON",
+            contentType: "application/json; charset=UTF-8",
+        }).done(function (data, status, xhr) {
+            if (status === "success") {
+                alert("삭제 성공")
+                document.location.href = "/planner/list?page=1&searchName=";
+            }
+        }).fail(function (data, status, errorThrown) {
+            alert("세부계획이 존재하기때문에 삭제되지 않습니다.")
+        });
+    }
+
+</script>
+</html>

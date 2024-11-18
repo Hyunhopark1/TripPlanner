@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 쓰기</title>
+    <link rel="stylesheet" href="/board/css/board_add.css">
+    <link href="/common/css/main.css" rel="stylesheet">
+    <link rel="stylesheet" href="/board/css/board_list.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script language="JavaScript" src="/js/jquery-3.7.1.min.js"></script>
+    {{>layout/linkcss}}
+</head>
+
+<body class="index-page">
+{{>layout/headermenu}}
+<main class="main">
+    <section id="background" class="section">
+        <div class="container mx-auto py-16 px-2">
+            <div class="board-container bg-white shadow-md rounded-lg p-3">
+                <h1 class="add-title">게시글 작성</h1>
+                <form id="postForm" name="postForm" method="post" enctype="multipart/form-data"
+                      onsubmit="handleSubmit(event)" class="p-4 bg-white no-border rounded">
+                    <!-- 게시판 선택 -->
+                    <select id="board-select" class="full-width mb-4 p-4 border border-gray-300 rounded"
+                            onchange="boardChange()">
+                        <option value="" disabled selected>게시판을 선택해 주세요</option>
+                        <option id="free" value="free">자유게시판</option>
+                        <option id="review" value="review">후기게시판</option>
+                    </select>
+
+                    <!-- 지역 선택 -->
+                    <select id="areaCode" name="areaCode"
+                            class="full-width mb-4 p-4 border border-gray-300 rounded hidden">
+                        <option value="" disabled selected>지역을 선택해 주세요</option>
+                        <option value="1" id="seoul">서울</option>
+                        <option value="2" id="incheon">인천</option>
+                        <option value="3" id="deajeon">대전</option>
+                        <option value="4" id="daegu">대구</option>
+                        <option value="5" id="gwangju">광주</option>
+                        <option value="6" id="busan">부산</option>
+                        <option value="7" id="ulsan">울산</option>
+                        <option value="8" id="sejong">세종</option>
+                        <option value="31" id="gyunggi">경기도</option>
+                        <option value="32" id="kangwon">강원도</option>
+                        <option value="33" id="choongbuk">충청북도</option>
+                        <option value="34" id="choongnam">충청남도</option>
+                        <option value="35" id="kyungbuk">경상북도</option>
+                        <option value="36" id="kyungnam">경상남도</option>
+                        <option value="37" id="junbook">전라북도</option>
+                        <option value="38" id="junnam">전라남도</option>
+                        <option value="39" id="jeju">제주도</option>
+                    </select>
+
+                    <!-- 제목 -->
+                    <input type="text" id="title" name="title" class="mb-4 full-width p-4 border border-gray-300 rounded" placeholder="제목을 입력하세요" required>
+
+                    <!-- 내용 -->
+                    <div id="content" name="content" class="mb-4 border border-gray-300 p-4 rounded-lg" contenteditable="true"></div>
+
+                    <!-- 이미지 프리뷰 영역 -->
+                    <div id="imagePreview" class="flex flex-wrap gap-2 mt-4"></div>
+
+                    <!-- 하단 바 -->
+                    <div class="flex justify-between items-center">
+                        <!-- 사진 추가 -->
+                        <button type="button" class="text-blue-500" onclick="document.getElementById('file').click()">
+                            <img id="image" src="/svg/image.svg" width="80px" class="fas fa-image fa-2x">
+                        </button>
+
+                        <!-- 취소 및 추가 버튼 -->
+                        <div class="flex space-x-4">
+                            <button type="button" onclick="goBack()"
+                                    class="bg-blue-500 text-white px-6 py-3 rounded-full text-lg">취소
+                            </button>
+                            <button type="submit" onclick="handleSubmit()"
+                                    class="bg-blue-500 text-white px-6 py-3 rounded-full text-lg">등록
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <input type="file" id="file" name="files" accept="image/*" onchange="handleFileSelect(event)" class="hidden" multiple>
+            </div>
+        </div>
+    </section>
+</main>
+{{>layout/footer}}
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+{{>layout/scripts}}
+</body>
+<script>
+    //뒤오가기
+    function goBack() {
+        window.history.back();
+    }
+
+    // 게시판 선택
+    function boardChange() {
+        const selectedBoard = document.getElementById("board-select").value;
+        const regionSelect = document.getElementById("areaCode");
+
+        if (selectedBoard === "review") {
+            regionSelect.classList.remove("hidden");
+        } else {
+            regionSelect.classList.add("hidden");
+        }
+    }
+
+    // 파일 추가
+    let imageCounter = 0;
+    let selectedFiles = [];
+    function handleFileSelect(event) {
+        const files = event.target.files;
+        const imagePreview = document.getElementById('imagePreview');
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            selectedFiles.push(file); // 선택된 파일을 배열에 추가
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const imageId = `image-${imageCounter++}`;
+
+                // 이미지와 X 버튼을 포함한 div 생성
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'image-container';
+                imageContainer.innerHTML = `
+                <img src="${e.target.result}" alt="Uploaded Image" data-id="${imageId}">
+                <button type="button" class="delete-btn" onclick="deleteUploadImage('${imageId}')">×</button>
+            `;
+                // 이미지 프리뷰 영역에 이미지 컨테이너 추가
+                imagePreview.appendChild(imageContainer);
+            }
+
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // 파일 삭제 함수 수정
+    function deleteUploadImage(imageId) {
+        const imageContainer = document.querySelector(`.image-container img[data-id="${imageId}"]`).closest('.image-container');
+        if (imageContainer) {
+            // selectedFiles 배열에서 파일을 제거하기 위한 정확한 인덱스를 찾기 위해 이미지 컨테이너의 순서를 구한다
+            const imgContainers = Array.from(document.querySelectorAll('.image-container img'));
+            const index = imgContainers.findIndex(img => img.getAttribute('data-id') === imageId);
+
+            if (index !== -1) {
+                selectedFiles.splice(index, 1); // 선택된 파일 배열에서 제거
+            }
+
+            imageContainer.remove(); // 이미지 컨테이너 삭제
+        }
+    }
+
+    // 제목과 내용의 길이 제한 설정
+
+    var titleMinLength = 2;
+    var titleMaxLength = 100;
+    var contentMinLength = 2;
+    var contentMaxLength = 1000;
+
+    function handleSubmit(event) {
+        event.preventDefault(); // 폼 제출 값 없음 방지
+
+        var form = document.getElementById("postForm");
+        var selectedBoard = document.getElementById("board-select").value;
+
+        // 제목과 내용 지역 가져오기
+        var title = document.getElementById("title").value;
+        var content = document.getElementById("content").innerHTML;
+        var areaCode = document.getElementById("areaCode").value;
+
+        // 게시판 선택에 따라 action 설정
+        if (selectedBoard === "free") {
+            form.action = "/boardFree/board_insert";
+        } else if (selectedBoard === "review") {
+            form.action = "/boardReview/board_insert";
+        } else {
+            alert("게시판을 선택해 주세요.");
+            return;
+        }
+
+        // 제목과 내용의 길이 검사
+        if (selectedBoard === "review" && (areaCode === "" || areaCode === null)) {
+            alert("지역을 선택해 주세요.");
+            return;
+        }
+
+        if (title.length < titleMinLength || title.length > titleMaxLength) {
+            alert("제목은 " + titleMinLength + "자에서 " + titleMaxLength + "자 사이로 입력해 주세요.");
+            return false;
+        }
+
+        if (content.length < contentMinLength || content.length > contentMaxLength) {
+            alert("내용은 " + contentMinLength + "자에서 " + contentMaxLength + "자 사이로 입력해 주세요.");
+            return false;
+        }
+
+        var formData = new FormData(form);
+
+        formData.set("content", content);
+
+        // 선택된 파일들을 FormData에 추가
+        for (let i = 0; i < selectedFiles.length; i++) {
+            formData.append("files", selectedFiles[i]);
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", selectedBoard === "free" ? "/boardFree/board_insert" : "/boardReview/board_insert", true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                console.log("폼 제출 성공");
+                var response = JSON.parse(xhr.responseText);
+                if (response.redirect) {
+                    window.location.href = response.redirect;
+                }
+            } else {
+                console.error("폼 제출 실패", xhr.responseText);
+            }
+        };
+        xhr.send(formData);
+    }
+</script>
+</html>

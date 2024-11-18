@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb3.sbsj.user.IUserMybatisMapper">
+    <!-- mapper namespace="@Mapper 로 선언된 클래스의 풀패키지.클래스 이름"-->
+    <insert id="insert" parameterType="UserDto" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_tbl
+        ( loginId
+        , password
+        , nickname
+        , gender
+        , name
+        , email
+        , photo)
+        VALUES ( #{loginId}
+               , #{password}
+               , #{nickname}
+               , #{gender}
+               , #{name}
+               , #{email}
+               , #{photo})
+    </insert>
+    <update id="update" parameterType="UserDto">
+        UPDATE user_tbl
+        SET nickname = #{nickname}
+          , email    = #{email}
+          , loginId  = #{loginId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE
+        FROM user_tbl
+        WHERE id = #{id}
+    </delete>
+
+    <select id="findById" resultType="UserDto">
+        SELECT id
+             , loginId
+             , nickname
+             , gender
+             , name
+             , email
+             , photo
+        FROM user_tbl
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByNickname" resultType="userDto">
+        SELECT id
+             , name
+             , nickname
+             , gender
+             , loginId
+             , password
+             , email
+        FROM user_tbl
+        WHERE nickname = #{nickname}
+    </select>
+
+    <select id="findByLoginId" resultType="userDto">
+        SELECT id
+             , loginId
+             , nickname
+             , password
+             , gender
+             , name
+             , email
+             , photo
+        FROM user_tbl
+        WHERE loginId = #{loginId}
+    </select>
+
+    <select id="findByEmail" resultType="userDto">
+        SELECT id
+             , loginId
+             , nickname
+             , gender
+             , name
+             , email
+             , photo
+        FROM user_tbl
+        WHERE email = #{email}
+    </select>
+
+    <select id="findByName" resultType="userDto">
+        SELECT id
+             , loginId
+             , nickname
+             , gender
+             , name
+             , email
+             , photo
+        FROM user_tbl
+        WHERE name = #{name}
+    </select>
+
+    <update id="changePassword" parameterType="userDto">
+        UPDATE user_tbl
+        SET password = #{password}
+        WHERE id = #{id}
+    </update>
+
+    <select id="idCheck" parameterType="String" resultType="int">
+        SELECT COUNT(loginId)
+        FROM user_tbl
+        WHERE loginId = #{loginId}
+    </select>
+
+    <select id="emailCheck" parameterType="String" resultType="int">
+        SELECT COUNT(email)
+        FROM user_tbl
+        WHERE email = #{email}
+    </select>
+
+    <select id="nicknameCheck" parameterType="String" resultType="int">
+        SELECT COUNT(nickname)
+        FROM user_tbl
+        WHERE nickname = #{nickname}
+    </select>
+
+</mapper>

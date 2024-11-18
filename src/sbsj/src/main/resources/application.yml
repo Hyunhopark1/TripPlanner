@@ -1,0 +1,36 @@
+server:
+  port: 8085
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: sbsj
+  profiles:
+    active: local
+
+# mysql datetime 과 return datetime
+  jackson:
+    deserialization:
+      adjust-dates-to-context-time-zone: false
+    time-zone: Asia/Seoul
+  # mustache
+  mustache:
+    enabled: true
+    charset: UTF-8
+    suffix": .html
+    check-template-location: true
+
+# mybatis (MyBatisConfig.java same functions)
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.sb3.sbsj
+  configuration:
+    map-underscore-to-camel-case: true
+
+# Api Key
+Api.key: ZK5%2FABP5iNBCAOoQYO1NPKX7ml5Iv4yQs5jo8bokCDw5RvV%2BwogquKHDfUj58azCWXGgn36NF9%2FqqYzoJI7ovA%3D%3D
+

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>플래너 보기</title>
+    {{>layout/linkcss}}
+    <style>
+        .labelFontColor {
+            color: #2a2f3e;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            margin-bottom: 20px; /* 여백 추가 */
+            box-sizing: border-box; /* 패딩 포함 */
+        }
+
+        button {
+            background-color: #4b99bb; /* 블루 배경 */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3; /* 호버 시 색상 변경 */
+        }
+
+        .flex {
+            display: flex;
+            justify-content: flex-end; /* 오른쪽 정렬 */
+            margin-top: 20px; /* 여백 추가 */
+        }
+
+        .btn-gap {
+            position: relative; /* 고정된 위치가 아니라, 페이지 맨 아래 배치 */
+            display: flex;
+            justify-content: flex-end; /* 버튼을 우측 정렬 */
+            gap: 10px; /* 버튼 간격 */
+            margin-top: 30px; /* 위쪽에 약간의 여백 추가 */
+            padding-bottom: 20px; /* 하단 여백 추가 */
+        }
+    </style>
+</head>
+<body class="index-page">
+{{>layout/headermenu}}
+<!-- 상단 바 -->
+<main class="main">
+    <section id="container" class="section accent-background"
+             style="background-image: url('/assets/img/pexels-photo-869258.jpeg'); background-size: cover; background-position: center;">
+        <div class="container">
+            <div id="myIframe">
+                <h1 class="add-title">플래너 수정</h1>
+                <fieldset id="postForm" name="postForm" style="height: calc(100% - 120px)"
+                          class="p-4 bg-white no-border rounded">
+                    <input type="hidden" id="currentUserId" value="{{sb3.id}}"/> <!-- 현재 로그인한 사용자 -->
+                    <input type="hidden" id="plannerUserId" value="{{plannerDto.userId}}"/> <!-- 플래너 작성자 -->
+
+
+                    <!-- 제목 -->
+                    <label for="title" class="labelFontColor">제목</label>
+                    <input type="text" id="title" name="title"
+                           class="mb-4 full-width p-4 border border-gray-300 rounded" placeholder="제목을 입력하세요"
+                           value="{{plannerDto.title}}" readonly>
+
+                    <!-- 기간 -->
+                    <div>
+                        <label for="startDate" class="labelFontColor">시작일</label>
+                        <input type="date" id="startDate" name="startDate" min="" value="{{plannerDto.startDate}}"
+                               readonly/>
+                        <label for="endDate" class="labelFontColor">종료일</label>
+                        <input type="date" id="endDate" name="endDate" min="" value="{{plannerDto.endDate}}" readonly/>
+                    </div>
+
+                    <!-- 인원 -->
+                    <label for="people" class="labelFontColor">인원</label>
+                    <input type="number" id="people" name="people"
+                           class="mb-4 border border-gray-300 p-4 rounded-lg" value="{{plannerDto.people}}" readonly>
+                    <p></p>
+
+                    <!-- 메모 -->
+                    <label for="memo" class="labelFontColor">메모</label>
+                    <input type="text" id="memo" name="memo" class="mb-4 border border-gray-300 p-4 rounded-lg"
+                           value="{{plannerDto.memo}}" readonly/>
+
+                    <!-- 하단 바 -->
+                    <div id="btn-container" class="flex justify-between items-center">
+                        <div class="btn-gap">
+                            <div>
+                                <button type="button" onclick="goDetail();"
+                                        class="bg-blue-500 px-6 py-3 rounded-full text-lg ">세부계획
+                                </button>
+                            </div>
+                            <div>
+                                <button type="button" onclick="goUpdate();"
+                                        class="bg-blue-500 px-6 py-3 rounded-full text-lg ">수정
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </section>
+</main>
+{{>layout/footer}}
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+{{>layout/scripts}}
+</body>
+<script>
+    function goDetail() {
+        document.location.href = "/planners/spots/{{plannerDto.id}}";
+    }
+
+    function goUpdate() {
+        document.location.href = "/planner/planner_modify?id={{plannerDto.id}}";
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    $('#startDate').attr('min', today);
+    $('#endDate').attr('min', today);
+    $('#startDate').val(today);
+    $('#endDate').val(today);
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const currentUserId = document.getElementById('currentUserId').value; // 현재 로그인한 사용자 ID
+        const plannerUserId = document.getElementById('plannerUserId').value; // 플래너 작성자 ID
+
+        if (currentUserId !== plannerUserId) {
+            // 자신의 글이 아닐 경우 세부계획, 수정 버튼 숨기기
+            document.getElementById('btn-container').style.display = 'none';
+        }
+    });
+</script>
+</html>

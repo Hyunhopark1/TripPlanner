@@ -1,0 +1,53 @@
+<header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+        <a href="/" class="logo d-flex align-items-center">
+            <img class="sitename" src="/svg/logo.svg" alt="Logo" width="160" height="80">
+        </a>
+        <nav id="navmenu" class="navmenu">
+            <ul>
+                <li><a href="/#hero" class="active">Home</a></li>
+                <li><a href="/planner/list?page=1&searchName=">플래너</a></li>
+                <li><a href="/#portfolio">지역별 관광 장소</a></li>
+                <li><a href="/#team">Team</a></li>
+                <li class="dropdown"><a href="#"><span>게시판</span> <i
+                        class="bi bi-chevron-down toggle-dropdown"></i></a>
+                    <ul>
+                        <li><a href="/boardFree/board_list?page=1&searchName=">자유게시판</a></li>
+                        <li class="dropdown"><a href="#"><span>후기게시판</span> <i
+                                class="bi bi-chevron-down toggle-dropdown"></i></a>
+                            <ul>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=1">서울</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=2">인천</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=3">대전</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=4">대구</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=5">광주</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=6">부산</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=7">울산</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=8">세종</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=31">경기</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=32">강원도</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=33">충북</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=34">충남</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=35">경북</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=36">경남</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=37">전북</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=38">전남</a></li>
+                                <li><a href="/boardReview/board_list?page=1&searchName=&areaCode=39">제주</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                {{#sb3}}
+                <li id="stomp-logo"><a href="/stompWoman/list">대화하러 가기</a></li>
+                <li id="logout-logo"><a href="/signout">Logout</a></li>
+                <li id="changepassword-logo"><a href="/selogin/changePassword">Change Password</a></li>
+                {{/sb3}}
+                {{^sb3}}
+                <li id="login-logo"><a href="/selogin/login">Login</a></li>
+                <li id="signup-logo"><a href="/selogin/signup">SignUp</a></li>
+                {{/sb3}}
+            </ul>
+            <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+        </nav>
+    </div>
+</header>

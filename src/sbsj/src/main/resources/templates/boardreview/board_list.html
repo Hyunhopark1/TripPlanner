@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>후기 게시판</title>
+    <link rel="stylesheet" href="/board/css/board_list.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script language="JavaScript" src="/js/jquery-3.7.1.min.js"></script>
+    {{>layout/linkcss}}
+</head>
+<body class="index-page">
+{{>layout/headermenu}}
+<main class="main">
+    <section id="background" class="section">
+        <div class="container mx-auto py-16 px-2">
+            <div class="container text-center mb-4" data-aos="fade-down" data-aos-delay="100">
+                <h1 class="text-4xl font-bold text-gray-700">후기 게시판 <span id="areaName"></span></h1>
+                <p class="text-gray-500 mb-4">다녀온 장소의 후기를 생생하게 공유해 보세요</p>
+            </div>
+            <div class="board-container bg-white shadow-md rounded-lg p-3">
+                <!-- 게시판 리스트 -->
+                <table class="min-w-full table-auto text-left">
+                    <thead>
+                    <tr class="text-gray-600 bg-gray-100 uppercase text-sm tracking-wider">
+                        <th class="py-2 pading-left">NO</th>
+                        <th class="py-2 pading-right text-center">제목</th>
+                        <th class="py-2">작성자</th>
+                        <th class="py-2 text-center">작성일</th>
+                        <th class="py-2 text-center">조회</th>
+                        <th class="py-2 text-center">좋아요</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#boardReviewList}}
+                    <tr class="board-content border-b hover:bg-gray-50 cursor-pointer" onclick="location.href='/boardReview/board_view?id={{id}}'">
+                        <td class="py-4 pading-left">{{id}}</td>
+                        <td class="py-4">{{title}} <span id="countComment">{{countComment}}</span></td>
+                        <td class="py-4">{{createName}}</td>
+                        <td class="py-4 text-center">{{createDt}}</td>
+                        <td class="py-4 text-center">{{viewQty}}</td>
+                        <td class="py-4 text-center">{{likeQty}}</td>
+                    </tr>
+                    {{/boardReviewList}}
+                    </tbody>
+                </table>
+                <div class="text-gray-600 mt-3">{{searchBoardDto.total}}개의 게시글</div>
+                <!-- 글쓰기 버튼-->
+                <div class="flex justify-between items-center justify-content-end mt-4">
+                    <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                            onclick="location.href='/boardReview/board_add?board=Review'">
+                        <img src="/board/write_icon.png" alt="글쓰기 아이콘" class="inline-block w-5 h-5 mr-2">글쓰기
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <!-- 페이징 처리 및 검색 -->
+                <div id="page-and-search" class="board-content mt-8 justify-between items-center">
+                    <!-- 페이징 -->
+                    <div id="pagination" class="flex justify-center space-x-2"></div> <!-- JavaScript에서 동적으로 페이징 처리 -->
+
+                    <!-- 검색 -->
+                    <form id="search-form" class="flex items-center justify-center items-center space-x-2" method="get" action="/boardReview/board_list">
+                        <select id="searchType" name="searchType" class="border rounded px-2 py-1 text-gray-600">
+                            <option value="title">제목</option>
+                            <option value="nickname">작성자</option>
+                        </select>
+                        <input type="text" id="searchName" name="searchName" placeholder="검색어를 입력해주세요"
+                               class="border rounded px-2 py-1 " value="{{searchBoardDto.searchName}}">
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">검색
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{{>layout/footer}}
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+{{>layout/scripts}}
+</body>
+
+<script>
+    //본인이 작성한 글 하이라이트
+    document.addEventListener("DOMContentLoaded", function () {
+        const loggedInUser = "{{sb3.nickname}}";
+
+        // 모든 게시글 행을 가져옴
+        document.querySelectorAll('.board-content').forEach(row => {
+            const creatorName = row.querySelector('td:nth-child(3)').textContent.trim(); // 작성자 이름
+
+            // 작성자 이름과 로그인한 사용자 이름이 일치하면 클래스 추가
+            if (creatorName === loggedInUser) {
+                row.classList.add('highlight');
+            }
+        });
+    });
+
+    $(function(){
+        let areaCode = "{{searchBoardDto.areaCode}}" * 1;
+        let areaName = getAreaName(areaCode);
+        let totPage = Math.ceil(("{{searchBoardDto.total}}" * 1) / 10);
+        let page = "{{searchBoardDto.page}}" * 1;
+        let startPage = getStartPage(page);
+        let endPage = getEndPage(startPage);
+        let searchName = '{{searchBoardDto.searchName}}';
+        let sClass = "pageBtn-primary";
+        let prev = (page-1) < 1 ? 1 : page-1;
+        let next = (page+1) >= totPage ? totPage : page+1;
+        $("#areaName").text(areaName);
+        $("#pagination").append("<a class='px-3 py-2 text-gray-700' href='board_list?page=" + prev + "&searchName=" + searchName  + "&areaCode=" + areaCode + "'>Prev</a>");
+        for (let i = startPage; i <= endPage; i++) {
+		            // 현재 페이지일 경우, 녹색 배경을 추가
+					            if (page == i) {
+                sClass = "px-3 py-2 text-gray-700 text-black-50";  // 녹색 배경에 흰색 텍스트
+            } else {
+                sClass = "px-3 py-2 text-gray-700";  // 기본 스타일
+            }
+
+            $("#pagination").append("<a class='" + sClass + "' href='board_list?page=" + i + "&searchName=" + searchName + "&areaCode=" + areaCode +"'>" + i + "</a>");
+        }
+        $("#pagination").append("<a class='px-3 py-2 text-gray-700' href='board_list?page=" + next + "&searchName=" + searchName + "&areaCode=" + areaCode +"'>Next</a>");
+    });
+
+    function getStartPage(page) {
+        let one = 1;
+        let ten = ~~((page - 1) / 10) * 10;
+        let startPage = ten + one;
+        return ~~(startPage);
+    }
+
+    function getEndPage(startPage) {
+        let totPage = ~~((("{{searchBoardDto.total}}" * 1) + 9) / 10);
+        let tPage = startPage + 9;
+        if ( tPage < totPage ) {
+            return ~~(tPage);
+        }
+        return ~~(totPage);
+    }
+
+    function getAreaName(areaCode) {
+        if (areaCode === 1) {
+            return " - 서울";
+        } else if (areaCode === 2) {
+            return " - 인천";
+        } else if (areaCode === 3) {
+            return " - 대전";
+        } else if (areaCode === 4) {
+            return " - 대구";
+        } else if (areaCode === 5) {
+            return " - 광주";
+        } else if (areaCode === 6) {
+            return " - 부산";
+        } else if (areaCode === 7) {
+            return " - 울산";
+        } else if (areaCode === 8) {
+            return " - 세종";
+        } else if (areaCode === 31) {
+            return " - 경기";
+        } else if (areaCode === 32) {
+            return " - 강원";
+        } else if (areaCode === 33) {
+            return " - 충북";
+        } else if (areaCode === 34) {
+            return " - 충남";
+        } else if (areaCode === 35) {
+            return " - 경북";
+        } else if (areaCode === 36) {
+            return " - 경남";
+        } else if (areaCode === 37) {
+            return " - 전북";
+        } else if (areaCode === 38) {
+            return " - 전남";
+        } else if (areaCode === 39) {
+            return " - 제주";
+        } else {
+            return "전체";
+        }
+    }
+</script>
+</html>

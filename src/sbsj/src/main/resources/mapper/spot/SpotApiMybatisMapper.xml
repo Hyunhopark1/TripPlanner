@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sb3.sbsj.api.spot.ISpotApiMapper">
+
+    <insert id="insertSpot" parameterType="SpotApiDto" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO Spot_tbl (title, addr1, tel, zipcode, mapX, mapY, firstimage, areaCodeId, contentTypeId)
+        VALUES (#{title}, #{addr1}, #{tel}, #{zipcode}, #{mapx}, #{mapy}, #{firstimage}, #{areacode}, #{contenttypeid})
+    </insert>
+</mapper>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sb3.sbsj.spotdetail.ISpotDetailMybatisMapper">
+
+    <select id="areaDetail" resultType="SpotDetailDto">
+        SELECT
+            id,
+            title,
+            tel,
+            addr1,
+            zipcode,
+            mapX,
+            mapY,
+            firstimage,
+        FROM
+            spot_tbl
+        WHERE firstimage != ''
+    </select>
+
+    <select id="findById" resultType="SpotDetailDto">
+        SELECT st.id,
+               st.title,
+               st.tel,
+               st.addr1,
+               st.zipcode,
+               st.mapX,
+               st.mapY,
+               st.firstimage
+    FROM spot_tbl AS st
+    WHERE st.id=#{id}
+    </select>
+
+</mapper>

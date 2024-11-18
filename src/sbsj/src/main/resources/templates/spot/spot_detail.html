@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>디테일 페이지</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script language="JavaScript" src="/js/jquery-3.7.1.min.js"></script>
+    <link href="/spot/css/detail.css" rel="stylesheet">
+    {{>layout/linkcss}}
+</head>
+<body class="index-page bg-gray-100">
+{{>layout/headermenu}}
+<div id="container">
+    <div id="detail-container" class="flex flex-col md:flex-row p-4" style="background-image: url('/assets/img/pexels-photo-869258.jpeg');">
+        <!-- 좌측 컨테이너 (사진과 지도) -->
+        <div class="left-container flex flex-col flex-1 mx-2">
+            <div class="spotPhoto flex justify-center items-center mb-4" id="spot-photo"></div>
+            <div class="relative">
+                <p class="text-lg font-bold mb-2" style="margin-left: 100px;">지도</p>
+                <div id="map" class="border-2 border-black rounded-lg col-lg-4 col-md-6"></div>
+            </div>
+        </div>
+
+        <!-- 우측 컨테이너 (관광정보와 로드뷰) -->
+        <div class="right-container flex flex-col flex-1 mx-2">
+            <div id="spot-detail">
+                <div class="p-4 text-lg font-bold col-lg-4 col-md-6">관광 정보</div>
+                <div id="detail-table">
+                <!-- 동적으로 내용 추가 -->
+                </div>
+            </div>
+            <h1 class="font-bold text-xl mb-2">로드뷰</h1>
+            <div id="roadview" class="border-2 border-black rounded-lg"></div>
+        </div>
+    </div>
+</div>
+{{>layout/footer}}
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+{{>layout/scripts}}
+</body>
+
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=b3e76518fea6f3902c49aacdb1a348f6&autoload=false"></script>
+<script>
+    kakao.maps.load(function () {
+        //$(function () {
+            getSearchId(); // 페이지 로드 시 ID를 가져와서 데이터 요청
+        //});
+    });
+
+    function getSpotDto(id) {
+        $.ajax({
+            url: "/spot/spot_detail/" + id,
+            type: "GET",
+            datatype: "JSON",
+            contentType: "application/json; charset=UTF-8"
+        }).done(function (data, status, xhr) {
+            if (status === "success") {
+                spotDetails(data.responseData);
+                showMap(data.responseData);
+            }
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("done:jqXHR=" + jqXHR + ", status=" + status + ", errorThrown=" + errorThrown);
+            alert("검색을 실패했습니다. " + jqXHR.responseJSON.message);
+        });
+    }
+
+    function spotDetails(SpotDto) {
+        let title = SpotDto.title;
+        let addr1 = SpotDto.addr1;
+        let tel = SpotDto.tel;
+        let zipcode = SpotDto.zipcode;
+        let firstimage = SpotDto.firstimage;
+
+        let strTitle = `<div class="div-detail"> Title : ${title}</div><br>`;
+        let strAddr1 = `<div class="div-detail"> Address : ${addr1}</div><br>`;
+        let strTel = `<div class="div-detail"> Tel : ${tel}</div><br>`;
+        let strZipcode = `<div class="div-detail"> ZipCode : ${zipcode}</div><br>`;
+        let spotImage = "<img src='" + firstimage + "' alt='Spot Image' class='rounded-lg shadow-md img-responsive'>";
+
+        $("#spot-photo").append(spotImage); // #spot-photo 요소에 이미지 추가
+        $("#detail-table").append(strTitle);
+        $("#detail-table").append(strAddr1);
+        $("#detail-table").append(strTel);
+        $("#detail-table").append(strZipcode);
+    }
+
+    function getSearchId() {
+        let id = getQueryParam('id'); // URL에서 'id' 값을 가져오는 함수 호출
+        if (id) {
+            getSpotDto(id); // 가져온 ID를 기반으로 AJAX 요청 실행
+        } else {
+            alert("잘못된 접근입니다. ID가 없습니다."); // ID가 없을 때 경고 메시지
+        }
+    }
+
+    function getQueryParam(param) {
+        let urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    function showMap(SpotDto) {
+        let mapX = SpotDto.mapX;
+        let mapY = SpotDto.mapY;
+
+        var mapContainer = document.getElementById('map'); // 지도를 표시할 div
+        var mapOption = {
+            center: new kakao.maps.LatLng(mapY, mapX), // 지도의 중심 좌표
+            level: 1 // 지도의 확대 레벨
+        };
+
+        var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다.
+
+        // 마커가 표시될 위치입니다.
+        var markerPosition = new kakao.maps.LatLng(mapY, mapX);
+
+        // 마커를 생성합니다.
+        var marker = new kakao.maps.Marker({
+            position: markerPosition
+        });
+
+        // 마커가 지도 위에 표시되도록 설정합니다.
+        marker.setMap(map);
+
+        var iwContent = `<div style="padding:5px;">${SpotDto.title}</div>`, // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
+            iwPosition = new kakao.maps.LatLng(mapY, mapX); //인포윈도우 표시 위치입니다
+
+        // 인포윈도우를 생성합니다
+        var infowindow = new kakao.maps.InfoWindow({
+            position : iwPosition,
+            content : iwContent
+        });
+
+        // 마커 위에 인포윈도우를 표시합니다. 두번째 파라미터인 marker를 넣어주지 않으면 지도 위에 표시됩니다
+        infowindow.open(map, marker);
+
+        var roadviewContainer = document.getElementById('roadview'); //로드뷰를 표시할 div
+        var roadview = new kakao.maps.Roadview(roadviewContainer); //로드뷰 객체
+        var roadviewClient = new kakao.maps.RoadviewClient(); //좌표로부터 로드뷰의 panoID를 가져올 로드뷰 helper객체
+
+        var position = new kakao.maps.LatLng(mapY, mapX);
+
+        // 특정 위치의 좌표와 가까운 로드뷰의 panoId를 추출하여 로드뷰를 띄운다.
+        roadviewClient.getNearestPanoId(position, 50, function(panoId) {
+            roadview.setPanoId(panoId, position); //panoId와 중심좌표를 통해 로드뷰 실행
+        });
+    }
+</script>
+</html>

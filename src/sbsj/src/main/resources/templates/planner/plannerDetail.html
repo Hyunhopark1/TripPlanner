@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상세 플레너</title>
+
+    {{>layout/linkcss}}
+
+    <!--    <link rel="stylesheet" href="/planner/css/planner_list.css">-->
+    <!--    <link href="/common/css/main.css" rel="stylesheet">-->
+    <!--    <link href="/mazer/assets/compiled/css/app.css" rel="stylesheet">-->
+    <!--    <link href="/mazer/assets/compiled/css/app-dark.css" rel="stylesheet">-->
+    <!--    <link href="/mazer/assets/compiled/css/iconly.css" rel="stylesheet">-->
+    <!--    <script src="https://cdn.tailwindcss.com"></script>-->
+    <!--    <script language="JavaScript" src="/js/jquery-3.7.1.min.js"></script>-->
+    <style>
+        .planner-Detail-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 100%;
+            gap: 24px;
+            border: 1px solid #ebeaec;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        #planner-spot {
+            display: flex; /* 플렉스 박스 활성화 */
+            flex-wrap: wrap; /* 카드들이 줄 바꿈 가능하도록 설정 */
+            width: 100%;
+            margin: -12px; /* 카드 간격을 보정하기 위한 음수 margin */
+        }
+
+        .card {
+            flex: 1 1 300px; /* 기본 너비를 300px로 설정하고 공간이 있으면 늘어남 */
+            min-width: 280px; /* 카드 최소 너비 */
+            margin: 12px; /* 카드 간격 */
+        }
+
+        #change-planner-btn,
+        #delete-planner-btn,
+        #goBack-btn {
+            padding: 10px 20px; /* 버튼 내부 여백 */
+            border: none; /* 기본 테두리 제거 */
+            border-radius: 8px; /* 둥근 모서리 */
+            cursor: pointer; /* 마우스 커서를 포인터로 변경 */
+            transition: background-color 0.3s ease; /* 배경색 변경 시 부드러운 전환 효과 */
+        }
+
+        #change-planner-btn,
+        #goBack-btn {
+            background: #007bff; /* 파란색 배경 */
+            color: #ffffff; /* 흰색 글씨 */
+        }
+
+        #change-planner-btn:hover,
+        #goBack-btn:hover {
+            background: #0056b3; /* 호버 시 더 어두운 파란색 */
+        }
+
+        #delete-planner-btn {
+            background: red; /* 빨간색 배경 */
+            color: #ffffff; /* 흰색 글씨 */
+        }
+
+        #delete-planner-btn:hover {
+            background: darkred; /* 호버 시 더 어두운 빨간색 */
+        }
+
+        .button-div {
+            position: relative; /* 고정된 위치가 아니라, 페이지 맨 아래 배치 */
+            display: flex;
+            justify-content: flex-end; /* 버튼을 우측 정렬 */
+            gap: 10px; /* 버튼 간격 */
+            margin-top: 30px; /* 위쪽에 약간의 여백 추가 */
+            padding-bottom: 20px; /* 하단 여백 추가 */
+        }
+
+        .cursor {
+            cursor: pointer;
+        }
+
+        .accordion-button {
+            background-color: #e3f2fd !important;
+            border: 1px solid #007bff;
+            color: #007bff;
+            transition: background-color 0.3s ease;
+            padding: 10px;
+        }
+
+        .accordion-button:hover {
+            background-color: #bbdefb;
+        }
+
+        .accordion-button[aria-expanded="true"] {
+            background-color: #bbdefb;
+        }
+    </style>
+</head>
+
+<body class="index-page">
+{{>layout/headermenu}}
+<link href="/mazer/assets/compiled/css/app.css" rel="stylesheet">
+<link href="/mazer/assets/compiled/css/app-dark.css" rel="stylesheet">
+<link href="/mazer/assets/compiled/css/iconly.css" rel="stylesheet">
+<!-- 상단 바 -->
+<main class="main">
+    <section id="container" class="section accent-background"
+             style="background-image: url('/assets/img/pexels-photo-869258.jpeg'); background-size: cover; background-position: center;">
+        <div class="container">
+            <div class="planner-container">
+                <!--게시판 종류 -->
+                <h1 class="plannerType">상세 플래너</h1>
+                <!-- 리스트 -->
+                <input type="hidden" id="user" name="user" value="{{sb3.nickname}}">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 id="title"></h4>
+                            <span id="startDate"></span>~<span id="endDate"></span><br>
+                            <span id="people"></span><span>(명)</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist"
+                                         aria-orientation="vertical">
+                                        <a class="nav-link" id="v-pills-settings-tab" data-bs-toggle="pill"
+                                           href="#v-pills-settings" role="tab" aria-controls="v-pills-settings"
+                                           aria-selected="false" tabindex="-1">메모</a>
+                                    </div>
+                                </div>
+                                <div class="col-9">
+                                    <div class="tab-content" id="v-pills-tabContent">
+                                        <div class="tab-pane fade" id="v-pills-settings" role="tabpanel"
+                                             aria-labelledby="v-pills-settings-tab">
+                                            <div id="memo"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 글쓰기 버튼 : planner/planner_add.html로 이동 -->
+                <div class="planner-Detail-container">
+                    <div class="row">
+                        <div id="planner-spot">
+                        </div>
+                    </div>
+                </div>
+                <div class="button-div">
+                    <div>
+                        <button type="button" id="goBack-btn" onclick="goBack();">뒤로가기</button>
+                    </div>
+                    <div>
+                        <button type="button" id="change-planner-btn" onclick="goDetail();">세부 수정</button>
+                    </div>
+                    <div>
+                        <button type="button" id="delete-planner-btn">삭제</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{{>layout/footer}}
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+{{>layout/scripts}}
+</body>
+
+<script>
+    let planId = "{{planId}}" * 1;
+    $(function () {
+        $.ajax({
+            url: "/api/planner/" + planId,
+            type: "GET",
+            dataType: "JSON",
+            contentType: "application/json; charset=UTF-8",
+        }).done(function (data, status, xhr) {
+            if (data.responseData) {
+                $("#title").text(data.responseData.title);
+                $("#startDate").text(data.responseData.startDate);
+                $("#endDate").text(data.responseData.endDate);
+                $("#memo").text(data.responseData.memo);
+                $("#people").text(data.responseData.people);
+                $.getPlannerSpot();
+            } else {
+                alert("데이터 조회 실패");
+            }
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("Error occurred", jqXHR.responseText);
+            alert("서버 오류:" + jqXHR.responseJSON.message);
+        });
+    });
+
+    $.getPlannerSpot = function () {
+        $.ajax({
+            url: "/api/planners/spots/planner/" + planId,
+            type: "POST",
+            dataType: "JSON",
+            contentType: "application/json; charset=UTF-8",
+            data: JSON.stringify({
+                planId: planId
+            }),
+        }).done(function (data, status, xhr) {
+            if (data.responseData) {
+                for (let i = 0; i < data.responseData.length; i++) {
+                    let item = data.responseData[i];
+                    // let htmlLi = `
+                    // <div class="col-xl-4 col-md-6 col-sm-12">
+                    //     <div class="card">
+                    //         <div class="card-content">
+                    //             <div class="card-body">
+                    //                 <h5 class="card-title">${item.title}</h5>
+                    //             </div>
+                    //         </div>
+                    //         <ul class="list-group list-group-flush">
+                    //             <li class="list-group-item">${item.addr1}</li>
+                    //             <li class="list-group-item">${item.tel}</li>
+                    //             <li class="list-group-item">${item.spotDate}, ${item.whatDay}</li>
+                    //             <li class="list-group-item">${item.time}시간</li>
+                    //             <li class="list-group-item">${item.firstimage} 사진보기</li>
+                    //             <div class="card-body">
+                    //                 <div class="accordion" id="cardAccordion">
+                    //                     <div class="accordion" id="accordionExample">
+                    //                         <div class="accordion-item">
+                    //                             <h2 class="accordion-header" id="headingOne">
+                    //                                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    //                                     메모
+                    //                                 </button>
+                    //                             </h2>
+                    //                             <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                    //                                 <div class="accordion-body">
+                    //                                     <strong>${item.spotMemo}
+                    //                                 </div>
+                    //                             </div>
+                    //                         </div>
+                    //                     </div>
+                    //                 </div>
+                    //             </div>
+                    //         </ul>
+                    //     </div>
+                    // </div>
+                    // `;
+                    $("#planner-spot").append(showSpot(item));
+                }
+            } else {
+                alert("데이터 조회 실패");
+            }
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("Error occurred", jqXHR.responseText);
+            alert("서버 오류:" + jqXHR.responseJSON.message);
+        });
+    }
+
+    function showSpot(item) {
+        let imageTag;
+        let showtel;
+        if (item.firstimage == null || item.firstimage === '') {
+            imageTag = `<li class="list-group-item">사진 없음</li>`;
+        } else {
+            imageTag = `<li class="list-group-item"><a class="cursor" onclick="openWindowPop('${item.firstimage}', 'popup');">사진 보기</a></li>`;
+        }
+
+        if (item.tel == null || item.tel === "") {
+            showtel = '<li class="list-group-item">전화번호 없음</li>';
+        } else {
+            showtel = `<li class="list-group-item">${item.tel}</li>`;
+        }
+        let htmlLi = `
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="card">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <h5 class="card-title">${item.title}</h5>
+                                </div>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">${item.addr1}</li>
+                                ${showtel}
+                                <li class="list-group-item">${item.spotDate}, ${item.whatDay}</li>
+                                <li class="list-group-item">${item.time}시간</li>
+                                ${imageTag}
+                                <div class="card-body">
+                                    <div class="accordion" id="cardAccordion">
+                                        <div class="accordion" id="accordionExample">
+                                            <div class="accordion-item">
+                                                <div class="accordion-header" id="heading-${item.id}">
+                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${item.id}" aria-expanded="false" aria-controls="collapse-${item.id}">
+                                                        메모
+                                                    </button>
+                                                </div>
+                                                <div id="collapse-${item.id}" class="accordion-collapse collapse" aria-labelledby="heading-${item.id}">
+                                                    <div class="accordion-body">
+                                                        <strong>${item.spotMemo}</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                    `;
+        return htmlLi;
+    }
+
+    function openWindowPop(url, name) {
+        let popupW = 600;
+        let popupH = 500;
+        let xPos = Math.ceil((window.screen.width - popupW) / 2);
+        let yPos = Math.ceil((window.screen.height - popupH) / 2);
+        let options = `top=${yPos}, left=${xPos}, width=600, height=500, status=no, menubar=no, toolbar=no, resizable=no, location=no, scrollbars=no`;
+        window.open(url, name, options);
+    }
+
+    $("#delete-planner-btn").click(function () {
+        $.plannerDelete(planId);
+    });
+
+    $.plannerDelete = function () {
+        if (!confirm("작성한 플래너를 삭제하시겠습니까 ?")) {
+            return;
+        }
+
+        $.ajax({
+            url: "/api/planners/spots/planner/" + planId,
+            type: "DELETE",
+            dataType: "JSON",
+            contentType: "application/json; charset=UTF-8",
+            data: JSON.stringify({
+                planId: planId
+            }),
+        }).done(function (data, status, xhr) {
+            if (status === "success") {
+                alert("삭제 성공")
+            }
+        }).fail(function (data, status, errorThrown) {
+            alert("삭제 실패")
+        });
+    }
+
+    function goDetail() {
+        document.location.href = "/planners/spots/make/" + planId;
+    }
+
+    function goBack() {
+        document.location.href = "/planner/list?page=1&searchName=";
+    }
+</script>
+</html>

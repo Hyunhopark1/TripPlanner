@@ -1,0 +1,27 @@
+/* 배경 */
+#background {
+    background-image: url('/assets/img/pexels-photo-869258.jpeg');
+    background-size: cover;
+    background-position: center;
+    min-height: 88vh;
+}
+/* 왼쪽 패딩 */
+.pading-left {
+    padding-left: 2rem;
+}
+/* 오른쪽 패딩 */
+.pading-right {
+    padding-right: 8rem;
+}
+/* 게시글 글자 색 */
+.board-content {
+    color : #555555;
+}
+/* 댓글 수 */
+#countComment {
+    color : red;
+}
+/* 본인 글 하이라이트 */
+.highlight {
+    background-color: #eaf6f6;
+}

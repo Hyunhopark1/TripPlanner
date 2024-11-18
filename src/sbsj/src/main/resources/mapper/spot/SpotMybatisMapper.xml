@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb3.sbsj.spot.ISpotMybatisMapper">
+
+    <insert id="insert" parameterType="SpotDto" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO spot_tbl (title
+                              ,tel
+                              ,addr1
+                              ,zipcode
+                              ,mapX
+                              ,mapY
+                              ,firstimage
+                              ,areaCodeId
+                              ,contentTypeId)
+        VALUES (#{title}
+               ,#{tel}
+               ,#{addr1}
+               ,#{zipcode}
+               ,#{mapX}
+               ,#{mapY}
+               ,#{firstimage}
+               ,#{areaCodeId}
+               ,#{contentTypeId}
+               )
+    </insert>
+
+    <update id="update" parameterType="SpotDto">
+        UPDATE spot_tbl
+        SET title = #{title}
+          , tel = #{tel}
+          , addr1 = #{addr1}
+          , zipcode = #{zipcode}
+          , mapX = #{mapX}
+          , mapY = #{mapY}
+          , firstimage = #{firstimage}
+          , areaCodeId = #{areaCodeId}
+          , contentTypeId = #{contentTypeId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM spot_tbl
+        WHERE id = #{id}
+    </delete>
+
+
+    <select id="findById" resultType="SpotDto">
+        SELECT id
+             ,title
+             ,tel
+             ,addr1
+             ,zipcode
+             ,mapX
+             ,mapY
+             ,firstimage
+             ,areaCodeId
+             ,contentTypeId
+        FROM spot_tbl
+        WHERE id = #{id}
+    </select>
+
+
+    <select id="countAllByFilters" parameterType="SearchAjaxDto" resultType="Integer">
+        SELECT count(*)
+        FROM
+        spot_tbl
+        WHERE firstimage != ''  AND (addr1 !='' OR  tel != '' OR  zipcode !='')
+        <if test='title != "s" '>
+            AND title like CONCAT('%',#{title},'%')
+        </if>
+        <if test="areaCodeId != null and areaCodeId != 0 ">
+            AND areaCodeId = #{areaCodeId}
+        </if>
+        <if test="contentTypeId != null and contentTypeId != 0 ">
+            AND contentTypeId = #{contentTypeId}
+        </if>
+    </select>
+
+
+    <select id="findSpotByFilters" parameterType="SpotSearchDto" resultType="SpotDto">
+        SELECT
+            id
+            ,title
+            ,tel
+            ,addr1
+            ,zipcode
+            ,mapX
+            ,mapY
+            ,firstimage
+            ,areaCodeId
+            ,contentTypeId
+        FROM
+            spot_tbl
+        WHERE firstimage != ''  AND (addr1 !='' OR  tel != '' OR  zipcode !='')
+             <if test='title != "s" '>
+                AND title like CONCAT('%',#{title},'%')
+            </if>
+            <if test="areaCodeId != null and areaCodeId != 0 ">
+                AND areaCodeId = #{areaCodeId}
+            </if>
+            <if test="contentTypeId != null and contentTypeId != 0 ">
+                AND contentTypeId = #{contentTypeId}
+            </if>
+        ORDER BY ${orderByWord}
+        LIMIT #{rowsOnePage} OFFSET #{firstIndex}
+    </select>
+
+</mapper>

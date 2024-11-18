@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>findPW</title>
+    <script language="JavaScript" src="/js/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="/user/css/findPW.css">
+    <script>
+        $.findPW = function () {
+            let email = $("#email").val();
+            let name = $("#name").val();
+            let loginId = $("#loginId").val();
+            $.ajax({
+                url: "/api/find/findpw",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "JSON",
+                data: JSON.stringify({
+                    loginId: loginId,
+                    email: email,
+                    name: name
+                }),
+            }).done(function (data, status, xhr) {
+                if (data.password) {
+                    $("#result").html("<span class='success'>" + data.password + "</span>");
+                } else {
+                    $("result").text(data.message);
+                }
+            }).fail(function (jqXHR, status, errorThrown) {
+                console.log("Error occurred ", jqXHR.responseText);
+                alert("에러 발생 : " + jqXHR.responseText)
+            });
+        }
+    </script>
+    {{>layout/linkcss}}
+</head>
+<body>
+{{>layout/headermenu}}
+<div id="find-pw-container">
+    <div class="form-wrapper">
+        <div id="find-pw-form">
+            <h2 id="find-pw-title">비밀번호 초기화</h2>
+            <div id="findPwForm">
+                <div class="form-group">
+                    <label for="loginId">로그인 아이디</label>
+                    <input type="text" id="loginId" name="loginId" required><br><br>
+                </div>
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" name="email" required><br><br>
+                </div>
+                <div class="form-group">
+                    <label for="name">이름</label>
+                    <input type="text" id="name" name="name" required><br><br>
+                </div>
+                <button type="button" id="find-pw-btn" onclick="$.findPW()">비밀번호 초기화</button>
+            </div>
+            <div id="result"></div>
+            <p></p>
+            <p>로그인 하러 가시겠습니까?<a href="/selogin/login" id="show-login">로그인</a></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

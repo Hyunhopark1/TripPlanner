@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sb3.sbsj.planner.mapper.IPlannerSpotMybatisMapper">
+
+    <!-- 명소 추가 -->
+    <insert id="insertPlannerSpot" useGeneratedKeys="true" keyProperty="id" parameterType="PlannerSpotDto">
+        INSERT INTO planner_spot_tbl (
+            spotDate
+            , whatDay
+            , time
+            , spotMemo
+            , howFar
+            , spotId
+            , planId)
+        VALUES (#{spotDate}
+            , #{whatDay}
+            , #{time}
+            , #{spotMemo}
+            , #{howFar}
+            , #{spotId}
+            , #{planId})
+    </insert>
+
+    <!-- 명소 수정 -->
+    <update id="updatePlannerSpot" parameterType="PlannerSpotDto">
+        UPDATE planner_spot_tbl
+        SET spotDate = #{spotDate}
+          , whatDay
+          , time = #{time}
+          , spotMemo = #{spotMemo}
+          , howFar = #{howFar}
+          , spotId = #{spotId}
+          , planId = #{planId}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 특정 명소 ID로 명소 삭제 -->
+    <delete id = "deletePlannerSpot">
+        DELETE FROM planner_spot_tbl
+        WHERE id = #{id}
+    </delete>
+
+    <!--특정 명소 ID로 명소 조회 -->
+    <select id="findById" resultType="PlannerSpotDto">
+        SELECT pst.id
+             , pst.spotDate
+             , pst.whatDay
+             , pst.time
+             , pst.spotMemo
+             , pst.howFar
+             , pst.spotId
+             , st.title
+             , st.addr1
+             , st.tel
+             , st.mapX
+             , st.mapY
+             , st.firstimage
+             , pst.planId
+        FROM planner_spot_tbl AS pst
+        INNER JOIN spot_tbl AS st ON st.id = pst.spotId
+        WHERE pst.id = #{id}
+    </select>
+
+    <!-- 특정 플래너 ID로 명소 조회 -->
+    <select id="selectPlannerSpotsByPlanId" parameterType="PlannerSpotDto" resultType="PlannerSpotDto">
+        SELECT pst.id
+        , pst.spotDate
+        , pst.whatDay
+        , pst.time
+        , pst.spotMemo
+        , pst.howFar
+        , pst.spotId
+        , st.title
+        , st.addr1
+        , st.tel
+        , st.mapX
+        , st.mapY
+        , st.firstimage
+        , pst.planId
+        FROM planner_spot_tbl AS pst
+            INNER JOIN spot_tbl AS st ON st.id = pst.spotId
+        WHERE pst.planId = #{planId}
+        <if test="spotDate != null and spotDate != ''">
+            AND pst.spotDate = #{spotDate}
+        </if>
+        ORDER BY pst.spotDate, pst.time, pst.id ASC
+    </select>
+
+    <!--특정 플래너 ID로 모든 명소 삭제 -->
+    <delete id="deletePlannerSpotsByPlanId">
+        DELETE FROM planner_spot_tbl
+            WHERE planId = #{planId}
+    </delete>
+</mapper>

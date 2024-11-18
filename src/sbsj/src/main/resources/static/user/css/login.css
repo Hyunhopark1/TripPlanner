@@ -1,0 +1,99 @@
+/* 기본 스타일 설정 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: url("https://images.pexels.com/photos/869258/pexels-photo-869258.jpeg") no-repeat center center fixed;
+    background-size: cover;
+}
+/* 로그인 컨테이너 스타일 */
+#login_container {
+    max-width: 400px;
+    width: 100%;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* 폼 래퍼 스타일 */
+#login_form_wrapper { /* form-wrapper를 id로 변경하여 특정화 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+/* 폼 컨테이너 스타일 */
+#login_form_container { /* form-container를 id로 변경하여 특정화 */
+    width: 100%;
+}
+
+#login_title { /* h2 태그에 id를 추가하여 스타일을 지정 */
+    margin-bottom: 20px;
+    font-size: 28px;
+    color: #333;
+    text-align: center;
+}
+
+/* 폼 그룹 스타일 */
+.login_form_group { /* form-group을 class로 변경하여 재사용 가능하도록 수정 */
+    margin-bottom: 20px;
+}
+
+.login_form_group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.login_form_group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+/* 버튼 스타일 */
+#login1_button1, #login2_button, #submit_button { /* 공용 button 태그 대신 id로 스타일 지정 */
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #007bff;
+    color: #ffffff;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#login_button1:hover, #login2_button:hover, #submit_button:hover { /* 버튼 hover 시 색상 변화 */
+    background: #0056b3;
+}
+
+.login_link {
+    text-align: center; /* 텍스트 중앙 정렬 */
+    margin-top: 10px; /* 링크 상단에 간격 추가 */
+}
+
+/* 링크 스타일 */
+.login_link p { /* p 태그를 특정화하기 위해 class 추가 */
+    text-align: center;
+    font-size: 14px;
+}
+
+.login_link a { /* a 태그에 class를 추가하여 스타일 지정 */
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login_link a:hover { /* a 태그 hover 스타일 */
+    text-decoration: underline;
+}

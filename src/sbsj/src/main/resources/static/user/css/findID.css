@@ -1,0 +1,128 @@
+/* 기본 스타일 설정 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: url("https://images.pexels.com/photos/869258/pexels-photo-869258.jpeg") no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* 컨테이너 스타일 */
+.container {
+    max-width: 400px !important; /* !important 추가 */
+    width: 100%;
+    padding: 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 폼 래퍼 스타일 */
+.form-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 폼 컨테이너 스타일 */
+.form-container {
+    width: 100%;
+}
+
+h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+}
+
+/* 폼 그룹 스타일 */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    margin-left: 10px;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input {
+    width: 90%; /* input 칸을 조금 줄임 */
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 16px;
+    margin-left:10px; /* 좌우 중앙 정렬을 위한 자동 마진 설정 */
+    margin-right:10px;
+    display: block; /* block 속성으로 변경하여 중앙 정렬 적용 */
+}
+
+/* 버튼 스타일 */
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px !important;
+    background: #007bff;
+    color: #ffffff;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* 결과 메시지 스타일 */
+#result {
+    margin-top: 15px;
+    font-size: 16px;
+    color: #333;
+    background-color: #f0f0f0;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 320px !important; /* 결과 창에도 !important 적용 */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.success {
+    color: green;
+}
+
+
+.login_link {
+    text-align: center; /* 텍스트 중앙 정렬 */
+    margin-top: 10px; /* 링크 상단에 간격 추가 */
+}
+
+/* 링크 스타일 */
+.login_link p { /* p 태그를 특정화하기 위해 class 추가 */
+    text-align: center;
+    font-size: 14px;
+}
+
+.login_link a { /* a 태그에 class를 추가하여 스타일 지정 */
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login_link a:hover { /* a 태그 hover 스타일 */
+    text-decoration: underline;
+}

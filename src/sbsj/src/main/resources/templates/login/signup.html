@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>회원 가입</title>
+    <link rel="stylesheet" href="/user/css/signup.css">
+    <script src="/js/jquery-3.7.1.min.js"></script>
+    <script>
+        function checkDuplicate(field, value) {
+            let url;
+            let fieldName;
+            let successMessage;
+            let errorMessage;
+
+            value = value.trim();
+
+            if (value === "") {
+                $(`#${field}_already`).css("display", "inline-block").text("값을 입력하세요.");
+                $(`#${field}_ok`).css("display", "none");
+                $(`#${field}_status`).val('empty');
+                return;
+            }
+
+            switch (field) {
+                case 'loginId':
+                    if ($("#loginId").val().length < 6 || $("#loginId").val().length > 20) {
+                        alert("아이디는 6~20 글자 사이여야 입니다.");
+                        return false;
+                    }
+                    url = '/selogin/idCheck';
+                    fieldName = '아이디';
+                    break;
+                case 'nickname':
+                    if ($("#nickname").val().length < 4 || $("#nickname").val().length > 20) {
+                        alert("닉네임은 4~20 글자 사이여야 입니다.");
+                        return false;
+                    }
+                    url = '/selogin/nicknameCheck';
+                    fieldName = '닉네임';
+                    break;
+                case 'email':
+                    if ($("#email").val().length < 2 || $("#email").val().length > 150) {
+                        alert("이메일은 1~150자 사이여야 입니다.");
+                        return false;
+                    }
+                    url = '/selogin/emailCheck';
+                    fieldName = '이메일';
+                    break;
+                default:
+                    return;
+            }
+
+            successMessage = `사용 가능한 ${fieldName} 입니다.`;
+            errorMessage = `중복된 ${fieldName} 입니다. 다른 ${fieldName}을 입력해주세요.`;
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+                data: {
+                    [field]: value
+                },
+                success: function (cnt) {
+                    if (cnt === 0) {
+                        $(`#${field}_ok`).css("display", "inline-block").text(successMessage);
+                        $(`#${field}_already`).css("display", "none");
+                        $(`#${field}_status`).val('ok');
+                    } else {
+                        $(`#${field}_already`).css("display", "inline-block").text(errorMessage);
+                        $(`#${field}_ok`).css("display", "none");
+                        $(`#${field}`).val('');
+                        $(`#${field}_status`).val('already');
+                    }
+                    checkSignupButtonStatus();
+                },
+                error: function (xhr, status, error) {
+                    console.error("에러 발생: ", xhr.responseText);
+                    alert("서버와의 통신 중 문제가 발생했습니다.");
+                }
+            });
+        }
+
+        function checkSignupButtonStatus() {
+            const loginIdStatus = $('#loginId_status').val();
+            const emailStatus = $('#email_status').val();
+            const nicknameStatus = $('#nickname_status').val();
+
+            if (loginIdStatus === 'ok' && emailStatus === 'ok' && nicknameStatus === 'ok') {
+                $('#submitBtn').prop('disabled', false);  // 회원가입 버튼 활성화
+                $('#submitBtn').css('background-color', '#007bff');  // 파란색 배경으로 변경
+            } else {
+                $('#submitBtn').prop('disabled', true);  // 회원가입 버튼 비활성화
+                $('#submitBtn').css('background-color', '#ccc');  // 회색 배경으로 변경
+            }
+        }
+
+        function checkId() {
+            const loginId = $('#loginId').val();
+            checkDuplicate('loginId', loginId);
+        }
+
+        function checkEmail() {
+            const email = $('#email').val();
+            checkDuplicate('email', email);
+        }
+
+        function checkNickname() {
+            const nickname = $('#nickname').val();
+            checkDuplicate('nickname', nickname);
+        }
+
+        $(document).ready(function () {
+            $('#submitBtn').prop('disabled', true);  // 비활성화
+            $('#submitBtn').css('background-color', '#ccc');  // 회색 배경
+        });
+
+        function checkPost() {
+            if ($("#loginId").val().length < 2 || $("#loginId").val().length > 20) {
+                alert("아이디는 6~20 글자 사이여야 입니다.");
+                return false;
+            }
+            if ($("#password").val().length < 8 || $("#password").val().length > 20) {
+                alert("비밀번호는 8~20 글자 사이여야 입니다.");
+                return false;
+            }
+            if ($("#password").val() !== $("#password2").val()) {
+                alert("암호 확인을 해주세요.");
+                $("#password2").focus();
+                return false;
+            }
+            if ($("#nickname").val().length < 4 || $("#nickname").val().length > 20) {
+                alert("닉네임은 4~20 글자 사이여야 입니다.");
+                return false;
+            }
+            if ($("input[name='gender']").val().length !== 3 && $("input[name='gender']").val().length !== 5) {
+                alert("남자 여자 중에서 선택하세요.");
+                return false;
+            }
+            if ($("#name").val().length < 2 || $("#name").val().length > 20) {
+                alert("이름은 2~20 글자 사이여야 입니다.");
+                return false;
+            }
+            if ($("#email").val().length < 2 || $("#email").val().length > 150) {
+                alert("이메일은 1~150자 사이여야 입니다.");
+                return false;
+            }
+
+            return true;
+        }
+
+        $.addFile = function (inputFile) {
+            let num = 0;
+            for (const file of inputFile.files) {
+                let html = "";
+                html += "<div id='file" + num + "' class='filebox'>";
+                html += "<div class='filename'>" + file.name + "</div>";
+                html += "</div>";
+                $("#fileListAdd").append(html);
+                fileArrayAdd.push(file);
+                num++;
+            }
+            $("#file").val("");
+        }
+
+    </script>
+    {{>layout/linkcss}}
+</head>
+<body>
+<div>
+    {{>layout/headermenu}}
+    <div class="low-lg-4 low-md-6">
+    <form name="signForm" method="post" action="/selogin/signup" onsubmit="return checkPost();">
+        <h3 class="signUp-title">회원가입</h3>
+        <p></p>
+        <label for="loginId">로그인 아이디</label>
+        <div class="input-group has-check">
+            <input type="text" id="loginId" name="loginId" maxlength="40"/>
+            <button class="loginIdCheckButton" type="button" onclick="checkId()">중복 확인</button>
+        </div>
+        <span id="loginId_ok" class="ok">사용 가능한 아이디 입니다.</span>
+        <span id="loginId_already" class="already">중복된 아이디 입니다.</span>
+
+        <input type="hidden" id="loginId_status" value="empty">
+
+        <br>
+
+        <div class="passwordInputText">
+            <label for="password">암호</label>
+            <input type="password" id="password" name="password" maxlength="150"/>
+        </div>
+
+        <br><br>
+
+        <div class="checkPasswordInputText">
+            <label for="password2">암호확인</label>
+            <input type="password" id="password2" name="password2" maxlength="150"/>
+        </div>
+
+        <br><br>
+
+        <label for="nickname">닉네임</label>
+        <div class="input-group has-check">
+            <input type="text" id="nickname" name="nickname" maxlength="50"/>
+            <button class="nicknameCheckButton" type="button" onclick="checkNickname()">중복 확인</button>
+        </div>
+        <span id="nickname_ok" class="ok">사용 가능한 닉네임 입니다.</span>
+        <span id="nickname_already" class="already">중복된 닉네임 입니다.</span>
+
+        <input type="hidden" id="nickname_status" value="empty">
+
+        <br>
+
+        <div class="gender-selection">
+            <input type="radio" checked id="male" name="gender" value="man">
+            <label for="male" class="btn">남</label>
+            <input type="radio" id="female" name="gender" value="woman">
+            <label for="female" class="btn">여</label>
+        </div>
+
+        <br>
+
+        <div class="nameInputText">
+            <label for="name">이름</label>
+            <input type="text" id="name" name="name" maxlength="40"/>
+        </div>
+
+        <br><br>
+
+        <label for="email">이메일</label>
+        <div class="input-group has-check">
+            <input type="email" id="email" name="email" maxlength="100"/>
+            <button class="emailCheckButton" type="button" onclick="checkEmail()">중복 확인</button>
+        </div>
+        <span id="email_ok" class="ok">사용 가능한 이메일 입니다.</span>
+        <span id="email_already" class="already">중복된 이메일 입니다.</span>
+
+        <input type="hidden" id="email_status" value="empty">
+
+        <br><br>
+
+        <div id="fileListAdd"></div>
+        <input type="submit" id="submitBtn" class="btnSignUp" value="회원가입"/>
+        <p class="login_go">계정이 이미 있으신가요?<a href="/selogin/login" id="show-findPW"> 로그인</a></p>
+    </form></div>
+    <br><br>
+</div>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb3.sbsj.boardreview.IBoardReviewMyBatisMapper">
+
+    <!--게시글 등록 -->
+    <insert id="insert" parameterType="BoardReviewDto" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO board_review_tbl ( title
+                                   , content
+                                   , createId
+                                    , areaCode)
+        VALUES ( #{title}
+               , #{content}
+               , #{createId}
+               , #{areaCode})
+    </insert>
+
+    <!-- 게시글 상세정보 조회 -->
+    <select id="findById" parameterType="long" resultType="BoardReviewDto" >
+        SELECT bt.id
+             , bt.title
+             , bt.content
+             , bt.viewQty
+             , bt.likeQty
+             , bt.createDt
+             , ut.nickname AS createName
+             , bt.createId
+             , bt.updateDt
+             , bt.deleteYn
+             , bt.areaCode
+        FROM board_review_tbl bt LEFT JOIN user_tbl ut
+        ON bt.createId = ut.id
+        WHERE bt.id = #{id}
+          AND bt.deleteYn = false
+    </select>
+
+    <!-- 게시글 수정 -->
+    <update id="update" parameterType="BoardReviewDto">
+        UPDATE board_review_tbl
+        SET title = #{title}
+          , content = #{content}
+          , updateDt = #{updateDt}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 게시글 삭제 -->
+    <delete id="delete" parameterType="long">
+        UPDATE board_review_tbl
+        SET deleteYn = TRUE
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 게시글 리스트 조회 -->
+    <select id="findAllByNameContains" parameterType="SearchBoardDto" resultType="BoardReviewDto">
+        SELECT bt.id
+             , bt.title
+             , ( SELECT COUNT(*)
+                 FROM board_comment_tbl
+                 WHERE tbl = 'review' AND boardId = bt.id AND deleteYn = false) AS countComment
+             , bt.content
+             , bt.viewQty
+             , bt.likeQty
+             , bt.createDt
+             , bt.createId
+             , ut.nickname AS createName
+             , bt.updateDt
+             , bt.deleteYn
+        FROM board_review_tbl bt
+        LEFT JOIN user_tbl ut ON bt.createId = ut.id
+        WHERE bt.deleteYn = false
+          AND ${searchType} LIKE CONCAT('%',#{searchName},'%')
+        <if test="areaCode != null and areaCode != ''">
+          AND bt.areaCode = #{areaCode}
+        </if>
+        ORDER BY ${orderByWord}
+        LIMIT #{rowsOnePage} OFFSET #{firstIndex}
+    </select>
+
+    <!-- 게시글 카운트 -->
+    <select id="countAllByNameContains" parameterType="SearchBoardDto" resultType="Integer">
+        SELECT COUNT(*)
+        FROM board_review_tbl bt
+        LEFT JOIN user_tbl ut ON bt.createId = ut.id
+        WHERE bt.deleteYn = false
+          AND ${searchType} LIKE CONCAT('%',#{searchName},'%')
+          <if test="areaCode != null and areaCode != ''">
+          AND bt.areaCode = #{areaCode}
+          </if>
+    </select>
+
+    <update id="addViewQty" parameterType="Long">
+        UPDATE board_review_tbl
+        SET viewQty = viewQty + 1
+        WHERE deleteYn = false
+          AND id = #{id}
+    </update>
+
+    <update id="addLikeQty">
+        UPDATE board_review_tbl
+        SET likeQty = likeQty + 1
+        WHERE id = #{id}
+          AND deleteYn = false
+    </update>
+
+    <update id="subLikeQty">
+        UPDATE board_review_tbl
+        SET likeQty = likeQty - 1
+        WHERE id = #{id}
+          AND deleteYn = false
+    </update>
+</mapper>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>지역별 장소 추천 검색페이지</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {{>layout/linkcss}}
+    <link href="/spot/css/search.css" rel="stylesheet">
+</head>
+<body class="index-page">
+{{>layout/headermenu}}
+
+<div id="container">
+    <div id="spot-container" style="background-image: url('/assets/img/pexels-photo-869258.jpeg'); background-size: cover; background-position: center;">
+        <div id="filterContainer">
+            <div id="site-title" style="font-size: 24px; font-weight: bold;">지역별 장소 검색 페이지</div>
+            <p style="margin-bottom: 20px">찾고자 하는 지역과 관광타입을 검색하거나 찾고하자는 관광지를 입력해보세요!</p>
+            <p>사진을 누르시면 해당 장소에 대한 상세 페이지로 넘어갑니다.</p>
+
+            <div class="select-container" >
+                <label for="areaSelect">지역 선택</label>
+                <select id="areaSelect">
+                    <option value="0">전체</option>
+                </select>
+                <label for="contentSelect">관광타입 선택</label>
+                <select id="contentSelect">
+                    <option value="0">전체</option>
+                </select>
+            </div>
+
+            <div class="searchBar">
+                <input type="text" id="title" placeholder="검색창" onkeydown="if(event.key==='Enter')$.searchTitle(); ">
+                <button id="searchButton" onclick="$.searchTitle();">검색</button>
+            </div>
+        </div>
+
+        <div class="photoSpot">
+            <div class="photo-grid" id="photoGrid">
+                <!-- AJAX로 사진이 여기에 로드됩니다. -->
+            </div>
+        </div>
+        <div id="pageDiv">
+            <!-- 페이징 -->
+        </div>
+    </div>
+</div>
+{{>layout/footer}}
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+{{>layout/scripts}}
+</body>
+<script>
+    let rowsOnePage = 6;
+
+    // 초기 페이지 로드
+    $(function () {
+        $.getAreaList();
+        $.getContentList();
+        loadPhotoSearch(1, $("#title").val(), $('#areaSelect').val(),  $('#contentSelect').val());
+    });
+
+    $.getAreaList = function () {
+        $.ajax({
+            url: "/spot/area",
+            type: "GET",
+            datatype: "JSON",
+            data: null,
+            contentType: "application/json; charset=UTF-8"
+        }).done(function (data, status, xhr) {
+            if (status === "success") {
+                $.areaSelect(data.responseData);
+            }
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("done:jqXHR=" + jqXHR + ", status=" + status + ", errorThrown=" + errorThrown);
+            alert("검색을 실패했습니다. " + jqXHR.responseJSON.message);
+        });
+    };
+
+    $.areaSelect = function (List) {
+        for (let i = 0; i < List.length; i++) {
+            let id = List[i].id;
+            let name = List[i].name;
+            let strLi = "<option value='" + id + "'>" + name + "</option>";
+            $("#areaSelect").append(strLi);
+        }
+    };
+
+    $.getContentList = function () {
+        $.ajax({
+            url: "/spot/content",
+            type: "GET",
+            datatype: "JSON",
+            data: null,
+            contentType: "application/json; charset=UTF-8"
+        }).done(function (data, status, xhr) {
+            if (status === "success") {
+                $.contentSelect(data.responseData);
+            }
+        }).fail(function (jqXHR, status, errorThrown) {
+            console.log("done:jqXHR=" + jqXHR + ", status=" + status + ", errorThrown=" + errorThrown);
+            alert("검색을 실패했습니다. " + jqXHR.responseJSON.message);
+        });
+    };
+
+    $.contentSelect = function (List) {
+        for (let i = 0; i < List.length; i++) {
+            let id = List[i].id;
+            let name = List[i].name;
+            let strLi = "<option value='" + id + "'>" + name + "</option>";
+            $("#contentSelect").append(strLi);
+        }
+    };
+
+    function loadPhotoSearch(page, title, areaCodeId, contentTypeId) {
+        if ( title === '' ) {
+            title = "s";
+        }
+        if( areaCodeId === null ){
+            areaCodeId = 0;
+        }
+        if( contentTypeId === null ){
+            contentTypeId = 0;
+        }
+        $.ajax({
+            url: "/spot/photos/" + page + "/" + title + "/" + areaCodeId + "/" + contentTypeId,
+            method: 'GET',
+            dataType: 'json',
+            success: function(response) {
+
+                let photoTotal = response.responseData.total;
+                // 기존 span 요소가 있으면 내용을 업데이트, 없으면 새로 추가
+                let photoTotalElement = $('.searchBar #photoTotal');
+                if (photoTotalElement.length > 0) {
+                    photoTotalElement.text(`검색 갯수: ${photoTotal}`);
+                } else {
+                    $('.searchBar').append(`<span id="photoTotal">검색 갯수: ${photoTotal}</span>`);
+                }
+
+                const photoGrid = $('#photoGrid');
+                photoGrid.empty(); // 이전 사진들 제거
+
+                const spotList = response.responseData.dataList; // 'responseData' 필드에서 사진 목록 가져오기
+
+                if (!Array.isArray(spotList) || spotList.length === 0) {
+                    photoGrid.append(`<p>사진이 없습니다.</p>`);
+                } else {
+                    spotList.forEach(spot => {
+                        photoGrid.append(`
+                        <button onclick="moveToDetail(${spot.id})">
+                            <img src="${spot.firstimage}" alt="사진 ${spot.id}" style="width: 100%; height: 100%; border-radius: 10px;">
+                        </button>
+                    `);
+                    });
+                }
+                $.makePageUI(response.responseData.total, page);
+            },
+            error: function() {
+                alert('사진을 불러오는 데 실패했습니다.');
+            }
+        });
+    }
+
+
+
+    // 지역이 변경될 때 호출
+    $('#areaSelect').on('change', function () {
+        loadPhotoSearch(1, $("#title").val(), $('#areaSelect').val(),  $('#contentSelect').val());
+    });
+
+    // 관광타입이 변경될 때 호출
+    $('#contentSelect').on('change', function () {
+        loadPhotoSearch(1, $("#title").val(), $('#areaSelect').val(),  $('#contentSelect').val());
+    });
+
+    // 관광명소 검색시 호출
+    $.searchTitle = function() {
+        loadPhotoSearch(1, $("#title").val(), $('#areaSelect').val(),  $('#contentSelect').val());
+    }
+
+
+    // 페이징 처리
+    $.makePageUI = function (paramTotal, paramPage) {
+        // paramTotal : 전체 데이터 수
+        // paramPage : 현재 페이지 번호
+        let totPage = ~~((paramTotal + rowsOnePage - 1) / rowsOnePage);    // 전체 페이지 수
+        let startPage = getStartPage(paramPage);
+        let endPage = getEndPage(startPage, paramTotal);
+        let prev = (paramPage - 1) < 1 ? 1 : paramPage - 1;
+        let next = (paramPage + 1) >= totPage ? totPage : paramPage + 1;
+        let sClass = "pageBtn-primary";
+
+        $("#pageDiv").children().remove();
+        $("#pageDiv").append("<a class=\"" + sClass + "\" onclick=\"loadPhotoSearch("
+            + prev + ", \'" + $("#title").val() + "\', " + $('#areaSelect').val() + ", " + $('#contentSelect').val() + ");\">Prev</a>");
+        for (let i = startPage; i <= endPage; i++) {
+            if (paramPage == i) {
+                sClass = "pageBtn-success";
+            }
+            $("#pageDiv").append(" <a class=\"" + sClass + "\" onclick=\"loadPhotoSearch("
+                + i + ", \'" + $("#title").val() + "\', " + $('#areaSelect').val() + ", " + $('#contentSelect').val() + ");\">" + i + "</a> ");
+            sClass = "pageBtn-primary";
+        }
+        $("#pageDiv").append(" <a class=\"" + sClass + "\" onclick=\"loadPhotoSearch("
+            + next + ", \'" + $("#title").val() + "\', " + $('#areaSelect').val() + ", " + $('#contentSelect').val() + ");\">Next</a> ");
+    }
+
+    function getStartPage(page) {
+        // 1~10 => 1, 11~20 => 11, 21~30 => 21
+        // let startPage = ((page - 1) / 10) * 10 + 1;
+        let one = 1;
+        let ten = ~~((page - 1) / 10) * 10;
+        let startPage = ten + one;
+        return ~~(startPage);
+    }
+
+    function getEndPage(startPage, paramTotal) {
+        // 시작페이지와 마지막페이지와 최종페이지 번호를 각각 비교해서
+        // 1~56, 시작페이지 : 1,2,3,4,5,6,7,8,9,10 => end = 10
+        // 1~56, 시작페이지 : 21,22,23,24,25,26,27,28,29,30 => end = 30
+        // 1~56, 시작페이지 : 51,52,53,54,55,56 => end = 56
+        let totPage = ~~((paramTotal + rowsOnePage - 1) / rowsOnePage);
+        let tPage = startPage + 9;
+        if (tPage < totPage) {
+            return ~~(tPage);
+        }
+        return ~~(totPage);
+    }
+
+    function moveToDetail(id) {
+        // 클릭한 사진에 해당하는 관광지 상세 페이지로 이동, id 값을 URL에 쿼리 파라미터로 포함
+        window.location.href = `/spot/spot_detail?id=${id}`;
+    }
+
+</script>
+</html>

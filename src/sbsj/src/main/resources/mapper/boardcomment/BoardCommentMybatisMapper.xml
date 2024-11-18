@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb3.sbsj.boardcomment.IBoardCommentMybatisMapper">
+    <insert id="insert" parameterType="BoardCommentDto" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO board_comment_tbl (tbl,
+                                       boardId,
+                                       comment,
+                                       createId)
+        VALUES ( #{tbl},
+                #{boardId},
+                #{comment},
+                #{createId} )
+    </insert>
+
+    <update id="update" parameterType="BoardCommentDto">
+        UPDATE board_comment_tbl
+        SET comment = #{comment}, updateDt = #{updateDt}, boardId=#{boardId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        UPDATE board_comment_tbl
+        SET deleteYn = true
+        WHERE id = #{id}
+    </delete>
+
+    <select id="findById" resultType="BoardCommentDto">
+        SELECT id, comment, tbl, likeQty, boardId, createDt, createId, updateDt, deleteYn
+        FROM board_comment_tbl
+        WHERE id = #{id} AND deleteYn = false
+    </select>
+
+    <select id="countAllByBoardId" parameterType="SearchAjaxDto" resultType="Integer">
+        SELECT count(*)
+        FROM board_comment_tbl
+        WHERE boardId = #{boardId} AND deleteYn = false
+    </select>
+
+    <update id="addLikeQty">
+        UPDATE board_comment_tbl
+        SET likeQty = likeQty + 1
+        WHERE id = #{id}
+          AND deleteYn = false
+    </update>
+
+    <update id="subLikeQty">
+        UPDATE board_comment_tbl
+        SET likeQty = likeQty - 1
+        WHERE id = #{id}
+          AND deleteYn = false
+    </update>
+
+    <select id="findAllByBoardIdTbl" parameterType="SearchBoardCommentDto" resultType="BoardCommentDto">
+        SELECT bct.id,
+               bct.comment,
+               bct.likeQty,
+               bct.boardId,
+               bct.createDt,
+               bct.createId,
+               ut.nickname AS createName,
+               bct.updateDt,
+               bct.deleteYn,
+               cl.commentId
+        FROM board_comment_tbl bct
+                 LEFT JOIN user_tbl ut ON bct.createId = ut.id
+                 LEFT JOIN comment_like_tbl cl
+                           ON bct.id = cl.commentId
+                               AND cl.createId = #{createId}
+        WHERE bct.boardId = #{boardId}
+          AND bct.tbl = #{tbl}
+          AND bct.deleteYn = false
+        ORDER BY ${orderByWord}
+            LIMIT #{rowsOnePage} OFFSET #{firstIndex}
+    </select>
+</mapper>

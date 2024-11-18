@@ -1,0 +1,9 @@
+.navmenu ul {
+    display: flex;              /* ul 태그를 flexbox로 설정 */
+    justify-content: flex-start; /* 기본적으로 왼쪽에 정렬 */
+    list-style: none;            /* 기본 목록 스타일 제거 */
+}
+
+#navmenu{
+    margin-right: 30px;
+}

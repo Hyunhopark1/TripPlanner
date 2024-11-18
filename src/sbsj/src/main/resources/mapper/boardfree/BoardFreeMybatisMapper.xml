@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb3.sbsj.boardfree.IBoardFreeMyBatisMapper">
+
+    <!--게시글 등록 -->
+    <insert id="insert" parameterType="BoardFreeDto" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO board_free_tbl ( title
+                                   , content
+                                   , createId)
+        VALUES ( #{title}
+               , #{content}
+               , #{createId})
+    </insert>
+
+    <!-- 게시글 상세정보 조회 -->
+    <select id="findById" parameterType="long" resultType="BoardFreeDto" >
+        SELECT bt.id
+             , bt.title
+             , bt.content
+             , bt.viewQty
+             , bt.likeQty
+             , bt.createDt
+             , bt.createId
+             , ut.nickname AS createName
+             , bt.updateDt
+             , bt.deleteYn
+        FROM board_free_tbl bt
+        LEFT JOIN user_tbl ut ON bt.createId = ut.id
+        WHERE bt.id = #{id}
+          AND bt.deleteYn = false
+    </select>
+
+    <!-- 게시글 수정 -->
+    <update id="update" parameterType="BoardFreeDto">
+        UPDATE board_free_tbl
+        SET title = #{title}
+          , content = #{content}
+          , updateDt = #{updateDt}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 게시글 삭제 -->
+    <delete id="delete" parameterType="long">
+        UPDATE board_free_tbl
+        SET deleteYn = TRUE
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 게시글 리스트 & 해당 글에 달린 댓글 개수 조회 -->
+    <select id="findAllByNameContains" parameterType="SearchBoardDto" resultType="BoardFreeDto">
+        SELECT bt.id
+             , bt.title
+             , (SELECT count(*)
+                from board_comment_tbl
+                WHERE tbl='free' AND boardId = bt.id AND deleteYn=false) AS countComment
+             , bt.content
+             , bt.viewQty
+             , bt.likeQty
+             , bt.createDt
+             , bt.createId
+             , ut.nickname AS createName
+             , bt.updateDt
+             , bt.deleteYn
+        FROM board_free_tbl bt
+        LEFT JOIN user_tbl ut ON bt.createId = ut.id
+        WHERE bt.deleteYn = false
+          AND ${searchType} LIKE CONCAT('%',#{searchName},'%')
+        ORDER BY ${orderByWord}
+        LIMIT #{rowsOnePage} OFFSET #{firstIndex}
+    </select>
+
+    <!-- 게시글 카운트 -->
+    <select id="countAllByNameContains" parameterType="SearchBoardDto" resultType="Integer">
+        SELECT COUNT(*)
+        FROM board_free_tbl bt
+        LEFT JOIN user_tbl ut ON bt.createId = ut.id
+        WHERE bt.deleteYn = false
+        AND ${searchType} LIKE CONCAT('%',#{searchName},'%')
+    </select>
+
+    <update id="addViewQty" parameterType="Long">
+        UPDATE board_free_tbl
+        SET viewQty = viewQty + 1
+        WHERE deleteYn = false
+        AND id = #{id}
+    </update>
+
+    <update id="addLikeQty">
+        UPDATE board_free_tbl
+        SET likeQty = likeQty + 1
+        WHERE id = #{id}
+        AND deleteYn = false
+    </update>
+
+    <update id="subLikeQty">
+        UPDATE board_free_tbl
+        SET likeQty = likeQty - 1
+        WHERE id = #{id}
+        AND deleteYn = false
+    </update>
+</mapper>

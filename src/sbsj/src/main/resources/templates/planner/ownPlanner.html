@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P02</title>
+
+    {{>layout/linkcss}}
+    <style>
+        .planner-title {
+            font-size: 40px;
+            text-decoration: underline solid;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 15px;
+            margin-bottom: 20px;
+            width: 500px;
+        }
+        .submit-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            text-align: left;
+        }
+        .modal-content input, .modal-content textarea {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .modal-header {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .modal-footer {
+            text-align: right;
+        }
+        .modal-footer button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        .close-modal {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+        }
+        .save-modal {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+
+        .error-modal {
+            display: none;
+            position: fixed;
+            z-index: 2;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .error-modal-content {
+            background-color: white;
+            margin: 20% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            text-align: center;
+        }
+        .error-modal-content p {
+            margin-bottom: 20px;
+        }
+        .error-modal-content h2 {
+            text-decoration: underline;
+            text-decoration-thickness: 2px;
+            text-underline-offset: 5px;
+            margin-bottom: 10px;
+        }
+        .error-modal-content button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .make-planner-title {
+            margin-bottom: 20px;
+            font-size: 28px;
+            color: #333;
+            text-align: center;
+            text-shadow: 0px 0px black !important;
+        }
+
+        .planner-text{
+            color: #333;
+            text-shadow: 0px 0px black !important;
+        }
+    </style>
+</head>
+
+<body class="index-page">
+{{>layout/headermenu}}
+<!-- 상단 바 -->
+<main class="main">
+    <section id="hero" class="hero section accent-background">
+        <img src="/assets/img/hero-bg.jpg" alt="" data-aos="fade-in" style="width: 100%;">
+
+        <div class="container text-center" data-aos="fade-up" data-aos-delay="100">
+            <h2>나만의 플래너</h2>
+            <button class="submit-btn" id="openModalBtn">작성</button>
+
+            <div id="myModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="make-planner-title">나만의 플래너 작성</h2>
+                    </div>
+                    <form action="/api/planners/makePlanner" method="POST" onsubmit="return validateForm()">
+                        <label class="planner-text" for="title">제목</label>
+                        <input type="text" id="title" name="title" placeholder="제목을 입력하세요">
+
+                        <label class="planner-text" for="start-date">시작 날짜</label>
+                        <input type="date" id="start-date" name="startDate">
+
+                        <label class="planner-text" for="end-date">종료 날짜</label>
+                        <input type="date" id="end-date" name="endDate">
+
+                        <label class="planner-text" for="people">인원 수</label>
+                        <input type="number" id="people" name="people" min = "1">
+
+                        <label class="planner-text" for="memo">메모</label>
+                        <textarea id="memo" name="memo" rows = "3" placeholder="메모를 입력하세요"></textarea>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="save-modal">저장</button>
+                            <button type="button" class="close-modal" id="closeModalBtn">취소</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="errorTitleModal" class="error-modal">
+                <div class="error-modal-content">
+                    <h2>경고!</h2>
+                    <p>제목을 입력해주세요!</p>
+                    <button type="button" onclick="closeErrorModal('errorTitleModal')">확인</button>
+                </div>
+            </div>
+
+            <div id="errorPeopleModal" class="error-modal">
+                <div class="error-modal-content">
+                    <h2>경고!</h2>
+                    <p>최소 1명 이상의 인원을 입력해주세요!</p>
+                    <button type="button" onclick="closeErrorModal('errorPeopleModal')">확인</button>
+                </div>
+            </div>
+
+            <div id="errorDateModal" class="error-modal">
+                <div class="error-modal-content">
+                    <h2>경고!</h2>
+                    <p>종료 날짜는 시작 날짜 이후여야 합니다!</p>
+                    <button type="button" onclick="closeErrorModal('errorDateModal')">확인</button>
+                </div>
+            </div>
+
+            <div id="errorMissingDateModal" class="error-modal">
+                <div class="error-modal-content">
+                    <h2>경고!</h2>
+                    <p>날짜를 설정해주세요!</p>
+                    <button type="button" onclick="closeErrorModal('errorMissingDateModal')">확인</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{{>layout/footer}}
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+{{>layout/scripts}}
+</body>
+
+<script>
+    const modal = document.getElementById("myModal");
+    const openModalBtn = document.getElementById("openModalBtn");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+
+    openModalBtn.onclick = function () {
+        modal.style.display = "block";
+    }
+    closeModalBtn.onclick = function () {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if(event.target === modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    function closeErrorModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+    }
+
+    function showErrorModal(modalId) {
+        document.getElementById(modalId).style.display = "block";
+    }
+
+    window.onload = function () {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("start-date").setAttribute('min', today);
+        document.getElementById("end-date").setAttribute('min', today);
+    }
+
+    function validateForm() {
+        const title = document.getElementById("title").value;
+        const people = document.getElementById("people").value;
+        const startDate = document.getElementById("start-date").value;
+        const endDate = document.getElementById("end-date").value;
+
+        if(!title) {
+            showErrorModal('errorTitleModal');
+            return false;
+        }
+
+        if(!people || people < 1) {
+            showErrorModal('errorPeopleModal');
+            return false;
+        }
+
+        if(!startDate || !endDate) {
+            showErrorModal('errorMissingDateModal');
+            return false;
+        }
+
+        if(new Date(endDate) <= new Date(startDate)) {
+            showErrorModal('errorDateModal');
+            return false;
+        }
+        return true;
+    }
+</script>
+
+</html>
